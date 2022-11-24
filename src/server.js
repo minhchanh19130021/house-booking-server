@@ -2,8 +2,10 @@ import express from "express";
 import configViewEngine from "./configs/viewEngine";
 import db from "./configs/connectDB";
 import initUserRoute from "./routes/apiUser";
-require("dotenv").config();
+import initFacilityRoute from "./routes/apiFacility";
 
+
+require("dotenv").config();
 const app = express();
 const port = process.env.PORT || 8080;
 
@@ -18,6 +20,8 @@ app.use(express.json());
 
 // router User
 initUserRoute(app);
+initFacilityRoute(app);
+
 
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`);
