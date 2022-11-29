@@ -1,48 +1,25 @@
-import Home from "../models/Home";
 import HomeDetail from "../models/HomeDetail";
 import mongoose from "mongoose";
 
 require("dotenv").config();
 
-let getListHomeIdWithSpecified = async (facilities, numberBedroom, numberBathroom, numberBed) => {
-  let condition = {}
-  if (facilities.length != 0) {
-    condition.facilities = {'$in': facilities};
-  }
-  condition.number_bedroom = numberBedroom == 0 ? {'$ne': 0}: numberBedroom;
-  condition.number_bathroom = numberBathroom == 0 ? {'$ne': 0}: numberBathroom;
-  condition.number_bed = numberBedroom == 0 ? {'$ne': 0}: numberBed;
+const numberListHomeInOnePage = 3;
 
-  let query = HomeDetail.find(condition)
-     .select("home_details._id ");
-  query.exec(function (err, homes) {
-    var result = [];
-    homes.forEach(function (home) {
-        result.push(home);
-    });   
-    return result;
-  })
-}
 let getListHomeByFilter = async (req, res, next) => {
-  // '$options': 'i': not capitalization
+  console.log(123);
   console.log(req.body);
-  const params = req.body; 
+  console.log(req.query);
+  req.body.stars = Array.from(req.body?.stars?.split(','))?.filter((e)=>e!='')
+  req.body.facilities = Array.from(req.body?.facilities?.split(','))?.filter((e)=>e!='')
+  const params = req.body;
+  console.log(params); 
   // set parameter for query
   let city = params.city === 'all' ? '.*' : params.city;
   let minPrice = params.minPrice === '' ? 0 : params.minPrice;
   let maxPrice = params.maxPrice === ''  ? Number.MAX_VALUE : params.maxPrice;
   let stars = params.stars.length === 0 ? [3, 4, 5] : params.stars.map(Number); // need cast to number for in operator below
 
-  // getListHomeIdWithSpecified (params.facilities,  params.numberBedroom,  params.numberBathroom,  params.numberBed);
-  // HomeDetail.find(
-  //   {'address.city': {'$regex': `${city}`} ,
-  //    name: { '$regex': `.*${params.name}.*`, '$options': 'i' } ,
-  //    price: {$gt: minPrice},
-  //    price: {$lt: maxPrice},
-  //    hid: {'$ne': null}
-  //   }).
-  // populate({path: 'hid', match: {rate: {$in: stars}}, option: {strictPopulate: false}}).
-  HomeDetail.aggregate([
+  let condition = [
     { $lookup: {
         from: "homes",
         localField: "hid",
@@ -72,7 +49,17 @@ let getListHomeByFilter = async (req, res, next) => {
       foreignField : "_id",
       as: "outstanding_facilities"
     }
-  }]).exec(function (err, homes) {
+  }]
+
+  let conditionToCount = [...condition];
+  conditionToCount.push(   {
+    $count: "count" // "count" is name of value
+ })
+  let countListHouse = await countListHomeByFilter(conditionToCount);
+ // skip, limit to pagination
+ condition.push( {$skip: (Number(req.query.pagination) - 1) * 3}, { $limit: 3 },)
+ // return list house
+  HomeDetail.aggregate(condition).exec(function (err, homes) {
     let result = [];
     homes.forEach(function (home) {
         let final = home.home_id[0];
@@ -82,10 +69,15 @@ let getListHomeByFilter = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       data: result,
+      // if countListHouse[0]?.count = undefined then use 0
+      pagination: Math.floor((countListHouse[0]?.count || 0) / numberListHomeInOnePage) + ((countListHouse[0]?.count || 0) % numberListHomeInOnePage)
     });
   });
 };
 
+let countListHomeByFilter = async function(conditionToCount) {
+  return HomeDetail.aggregate(conditionToCount).exec();
+}
 module.exports = {
   getListHomeByFilter
 };

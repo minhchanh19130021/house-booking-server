@@ -2,8 +2,9 @@ import Home from "../models/Home";
 import HomeDetail from "../models/HomeDetail";
 
 require("dotenv").config();
+const numberListHomeInOnePage = 3;
 
-let getAllHouses = async (req, res, next) => {
+let getAllHome = async (req, res, next) => {
     let query = Home.find({});
     query.exec(function (err, homes) {
       var result = [];
@@ -17,24 +18,27 @@ let getAllHouses = async (req, res, next) => {
     })
 };
 
-let getAllHousesByCity = async (req, res, next) => {
+let getAllHomeByCity = async (req, res, next) => {
   Home.find({'address.city': req.params.slug})
   .populate({path: 'outstanding_facilities', option: {strictPopulate: false}})
-  .limit(3)
-  .skip((req.params.pagination-1) * 3)
+  .skip((Number(req.params.pagination)-1) * numberListHomeInOnePage)
+  .limit(3) 
   .exec(function (err, homes) {
     let result = [];
     homes.forEach(function (home) {
         result.push(home);
     });
-    return res.status(200).json({
-      success: true,
-      data: result,
-    });
+    Home.countDocuments({'address.city': req.params.slug}, (err, countListHouse)=>{
+      return res.status(200).json({
+        success: true,
+        data: result,
+        pagination:  Math.floor(countListHouse / numberListHomeInOnePage) + (countListHouse % numberListHomeInOnePage)
+      });
+    })
   });
 };
 
 module.exports = {
-  getAllHouses,
-  getAllHousesByCity
+  getAllHome,
+  getAllHomeByCity
 };
