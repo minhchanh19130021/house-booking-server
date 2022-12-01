@@ -5,6 +5,7 @@ import initUserRoute from "./routes/apiUser";
 import initFacilityRoute from "./routes/apiFacility";
 import initHomeRoute from "./routes/apiHome";
 import initFilterRoute from "./routes/apiFilter";
+import initTestRoute from "./routes/apiTest";
 
 
 
@@ -26,6 +27,7 @@ initUserRoute(app);
 initFacilityRoute(app);
 initHomeRoute(app);
 initFilterRoute(app);
+initTestRoute(app);
 
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`);
