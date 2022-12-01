@@ -6,13 +6,13 @@ require("dotenv").config();
 const numberListHomeInOnePage = 3;
 
 let getListHomeByFilter = async (req, res, next) => {
-  console.log(123);
-  console.log(req.body);
-  console.log(req.query);
-  req.body.stars = Array.from(req.body?.stars?.split(','))?.filter((e)=>e!='')
-  req.body.facilities = Array.from(req.body?.facilities?.split(','))?.filter((e)=>e!='')
-  const params = req.body;
-  console.log(params); 
+  if (!req.body.stars || typeof req.body.stars === 'string'){
+    req.body.stars = Array.from(req.body.stars.split(',')).filter((e)=>e!='')
+  }
+  if (!req.body.facilities || typeof req.body.facilities === 'string'){
+    req.body.facilities = Array.from(req.body.facilities.split(',')).filter((e)=>e!='')    
+  }
+  const params = req.body;  
   // set parameter for query
   let city = params.city === 'all' ? '.*' : params.city;
   let minPrice = params.minPrice === '' ? 0 : params.minPrice;

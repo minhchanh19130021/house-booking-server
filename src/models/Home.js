@@ -16,7 +16,9 @@ const HouseSchema = Schema({
     number:{type: String, required: true, trim: true},
   },
   outstanding_facilities: [{type: Schema.Types.ObjectId, ref: "facilities"}],
-});
+}, 
+ {versionKey: false} // Setting the versionKey to false means the document is no longer versioned.
+);
 
 module.exports = mongoose.model("homes", HouseSchema);
 
