@@ -7,17 +7,17 @@ const numberListHomeInOnePage = 3;
 
 let getListHomeByFilter = async (req, res, next) => {
   if (!req.body.stars || typeof req.body.stars === 'string'){
-    req.body.stars = Array.from(req.body.stars.split(',')).filter((e)=>e!='')
+    req.body.stars = Array.from(req.body.stars !== undefined ? req.body.stars.split(',') : '').filter((e)=>e!='')
   }
   if (!req.body.facilities || typeof req.body.facilities === 'string'){
-    req.body.facilities = Array.from(req.body.facilities.split(',')).filter((e)=>e!='')    
+    req.body.facilities = Array.from(req.body.facilities !== undefined ? req.body.facilities.split(',') : '').filter((e)=>e!='')    
   }
   const params = req.body;  
   // set parameter for query
   let city = params.city === 'all' ? '.*' : params.city;
-  let minPrice = params.minPrice === '' ? 0 : params.minPrice;
-  let maxPrice = params.maxPrice === ''  ? Number.MAX_VALUE : params.maxPrice;
-  let stars = params.stars.length === 0 ? [3, 4, 5] : params.stars.map(Number); // need cast to number for in operator below
+  let minPrice = !params.minPrice ? 0 : params.minPrice;
+  let maxPrice = !params.maxPrice ? Number.MAX_VALUE : params.maxPrice;
+  let stars = params?.stars?.length === 0 ? [3, 4, 5] : params.stars.map(Number); // need cast to number for in operator below
 
   let condition = [
     { $lookup: {
@@ -34,9 +34,9 @@ let getListHomeByFilter = async (req, res, next) => {
         'home_id.price': {$gte: Number(minPrice)},
         'home_id.price': {$lte: Number(maxPrice)},
         'home_id.rate': {$in: stars},
-        number_bedroom : params.numberBedroom == 0 ? {$ne: 0}: params.numberBedroom,
-        number_bathroom : params.numberBathroom == 0 ? {$ne: 0}: params.numberBathroom,
-        number_bed : params.numberBedroom == 0 ? {$ne: 0}: params.numberBed,
+        number_bedroom : params.numberBedroom === '' ? {$ne: 0}: params.numberBedroom,
+        number_bathroom : params.numberBathroom === '' ? {$ne: 0}: params.numberBathroom,
+        number_bed : params.numberBedroom === '' ? {$ne: 0}: params.numberBed,
         facilities : params.facilities.length === 0 ? {$ne: []} : {$in: params.facilities.map(e=>mongoose.Types.ObjectId(e))}
       }
     },
