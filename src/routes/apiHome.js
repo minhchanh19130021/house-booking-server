@@ -1,7 +1,7 @@
 import express from "express";
 import HouseController from "../controllers/HomeController";
 
-let router = express.Router();
+const router = express.Router();
 
 const initFacilityRoute = (app) => {
   router.get("/houses", (req, res)=>{

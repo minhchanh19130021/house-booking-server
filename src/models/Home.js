@@ -20,5 +20,5 @@ const HouseSchema = Schema({
  {versionKey: false} // Setting the versionKey to false means the document is no longer versioned.
 );
 
-module.exports = mongoose.model("homes", HouseSchema);
+export default mongoose.model("Home", HouseSchema)
 
