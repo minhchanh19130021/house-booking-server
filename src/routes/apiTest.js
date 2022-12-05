@@ -5,7 +5,7 @@ let router = express.Router();
 
 const initTestRoute = (app) => {
   router.get("/test", (req, res)=>{
-    TestController.putAddNewHome(req, res)
+    TestController.getTest(req, res)
   });
 
   return app.use("/api/v2/", router);

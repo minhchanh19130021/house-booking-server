@@ -3,6 +3,8 @@ import configViewEngine from "./configs/viewEngine";
 import db from "./configs/connectDB";
 import initUserRoute from "./routes/apiUser";
 import initFacilityRoute from "./routes/apiFacility";
+var cookieParser = require("cookie-parser");
+var cors = require("cors");
 import initHomeRoute from "./routes/apiHome";
 import initFilterRoute from "./routes/apiFilter";
 import initTestRoute from "./routes/apiTest";
@@ -19,6 +21,7 @@ const ejs = require('ejs');
 const paypal = require('paypal-rest-sdk');
 
 require("dotenv").config();
+
 const app = express();
 const port = process.env.PORT || 8080;
 
@@ -31,10 +34,12 @@ db.connectDB();
 app.use(cors())
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-
+app.use(cors());
+app.use(cookieParser());
 // router User
 initUserRoute(app);
 initFacilityRoute(app);
+
 initHomeRoute(app);
 initFilterRoute(app);
 initTestRoute(app);
