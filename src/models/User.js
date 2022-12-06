@@ -28,7 +28,7 @@ const UserSchema = new Schema(
       specifically: { type: String, required: true },
     },
     active: { type: Boolean, required: true, default: false },
-    codeActive: { type: String },
+    code_active: { type: String },
     refreshToken: { type: String },
   },
   { collection: "users" }

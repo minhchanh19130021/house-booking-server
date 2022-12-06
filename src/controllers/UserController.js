@@ -1,10 +1,9 @@
+import sendEmail from "../configs/mailer";
 import User from "../models/User";
 require("dotenv").config();
 const bcrypt = require("bcrypt");
 var nodemailer = require("nodemailer");
 const jwt = require("jsonwebtoken");
-var LocalStorage = require("node-localstorage").LocalStorage,
-  localStorage = new LocalStorage("./scratch");
 
 let refreshTokens = [];
 
@@ -69,46 +68,18 @@ let registerUser = async (req, res) => {
           city,
       },
       type: "visitor",
-      active: req.body.active,
-      codeActive: token_mail_verification,
+      code_active: token_mail_verification,
     });
 
-    var transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: "tmdt.2022.v1@gmail.com",
-        pass: "rmuftepcchlbpsog",
-      },
-    });
-    var mailOptions = {
-      from: "2022 tmdt",
-      to: "19130021@st.hcmuaf.edu.vn",
-      subject: "Account Verification",
-      text: "Click on the link below to veriy your account " + url,
-    };
-
-    // send mail with defined transport object
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.log(error);
-        return res.status(502).json({
-          success: false,
-          data: "fail",
-        });
-      } else {
-        console.log("Email sent: " + info.response);
-        return res.status(200).json({
-          success: true,
-          data: "ok",
-        });
-      }
-    });
-    res.cookie("active", token_mail_verification, {
-      httpOnly: true,
-      secure: false,
-      path: "/",
-      sameSite: "strict",
-    });
+    await sendEmail(
+      newUser?.email,
+      `Xác Minh Địa Chỉ Email`,
+      ``,
+      newUser.username,
+      `Chúng tôi rất vui vì bạn đã đăng ký tài khoản trên DNA. Trước khi có thể sử dụng tài khoản của mình, bạn cần xác minh rằng đây là địa chỉ email của bạn bằng cách nhấp vào đây`,
+      url,
+      `Nhấp Vào Đây Để Xác Minh`
+    );
 
     await newUser.save();
     return res.status(200).json({
@@ -123,77 +94,114 @@ let registerUser = async (req, res) => {
   }
 };
 
-let requestResetPassword = (req, res) => {
-  try {
-    const oldUserByEmail = User.findOne({ email: req.body.email });
-    if (!oldUserByEmail) {
-      return res
-        .status(200)
-        .json({ status: false, msg: "Không tim thấy tài khoản" });
-    } else {
-      var mail = {
-        id: req.body.email,
-        created: new Date().toString(),
-      };
-      const token_reset_password = jwt.sign(
-        mail,
-        process.env.RESET_PASSWORD_SECRET,
-        {
-          expiresIn: "1d",
-        }
-      );
-      const link = `http://localhost:8080/reset-password/id=${oldUserByEmail._id}/token=${token_reset_password}`;
-      return res.status(200).json({
-        status: true,
-        msg: "Yêu cầu khôi phục tài khoản thành công",
-        link: link,
-      });
-    }
-  } catch (error) {
-    console.log(error);
-  }
-};
-
-let verifyResetPassword = async (req, res) => {
-  try {
-    const token = req.query.id;
-    const user = await User.findOne({ username: token });
-    if (!user) {
-      res.writeHead(307, {
-        Location: "http://localhost:3000/confirm-fail",
-      });
-    } else {
-      res.writeHead(307, {
-        Location: "http://localhost:3000/confirm-success",
-      });
-      res.end();
-    }
-  } catch (error) {
-    console.log(error);
-  }
-};
-
 let verifyUser = async (req, res) => {
+  const token = await req.query.id;
+  const user = await User.findOne({ code_active: token });
   try {
-    const token = await req.query.id;
-    const user = await User.findOne({ codeActive: token });
-
     if (!user) {
+      // res.send("<h1>Bad Request</h1>");
       res.writeHead(307, {
         Location: "http://localhost:3000/confirm-fail",
       });
+
+      // return res.status(200).json({ msg: "thất bại" });
     } else {
+      // res.send("<h1>Email " + mailOptions.to + " is been Successfully verified");
       user.active = true;
-      user.codeActive = null;
-      user.save();
+      user.code_active = null;
+      await user.save();
 
       res.writeHead(307, {
         Location: "http://localhost:3000/confirm-success",
       });
       res.end();
+      // res.redired(307, "http://localhost:3000/confirm-success");
+      // return res.status(200).json({ msg: "thành cong" });
     }
   } catch (error) {
     return res.status(500).json({ status: false, msg: error });
+  }
+};
+
+let requestResetPassword = async (req, res) => {
+  try {
+    const user = await User.findOne({ email: req.body.email });
+    if (user) {
+      const token = jwt.sign(
+        { email: user.email, id: user.id },
+        process.env.RESET_PASSWORD_SECRET,
+        {
+          expiresIn: "5m",
+        }
+      );
+      const url = `http://localhost:3000/new-password/id=${user._id}/token=${token}`;
+      await sendEmail(
+        user?.email,
+        `Quên Mật Khẩu`,
+        ``,
+        user?.username,
+        `Chúng tôi nhận được yêu cầu khôi phục mật khẩu từ bạn. Vui lòng nhấn vào liên kết phía bên dưới để cập nhật mật khẩu mới.`,
+        url,
+        `Cập nhật mật khẩu mới`
+      );
+
+      return res.status(200).json({
+        status: true,
+        msg: "Vui lòng kiểm tra email để tạo mật khẩu mới",
+        link: url,
+      });
+    }
+    return res.status(404).json({
+      status: false,
+      msg: "Không tìm thấy tài khoản phù hợp với email",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      msg: error,
+    });
+  }
+};
+
+let verifyLinkResetPassword = async (req, res) => {
+  try {
+    const verify = jwt.verify(
+      req.body.token,
+      process.env.RESET_PASSWORD_SECRET
+    );
+
+    if (verify) {
+      const oldUser = await User.findOne({
+        _id: req.body.id,
+        email: verify.email,
+      });
+      if (!oldUser) {
+        return res.status(404).json({
+          status: false,
+          msg: "Đường dẫn không chính xác. Vui lòng kiểm tra lại email",
+        });
+      } else {
+        const salt = await bcrypt.genSalt(10);
+        const encryptedPassword = await bcrypt.hash(req.body.password, salt);
+        oldUser.password = encryptedPassword;
+        await oldUser.save();
+
+        return res.status(200).json({
+          status: true,
+          msg: "Thay đổi mật khẩu thành công",
+          data: oldUser,
+        });
+      }
+    } else {
+      return res.status(400).json({
+        msg: "Đường dẫn hết thời gian sử dụng",
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      msg: error,
+    });
   }
 };
 
@@ -359,6 +367,7 @@ function generateRefreshToken(user) {
     { expiresIn: "365d" }
   );
 }
+
 module.exports = {
   registerUser,
   loginUser,
@@ -367,4 +376,5 @@ module.exports = {
   requestRefreshToken,
   updateUser,
   requestResetPassword,
+  verifyLinkResetPassword,
 };
