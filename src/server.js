@@ -16,7 +16,7 @@ import {
 
 } from "./controllers/home.js";
 // import useFetch from "./hooks/useFetch";
-import cors from "cors";
+var cors = require('cors')
 const ejs = require('ejs');
 const paypal = require('paypal-rest-sdk');
 
@@ -34,7 +34,6 @@ db.connectDB();
 app.use(cors())
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(cors());
 app.use(cookieParser());
 // router User
 initUserRoute(app);

@@ -16,7 +16,8 @@ const initUserRoute = (app) => {
   );
   router.post("/refreshToken", UserController.requestRefreshToken);
   router.post("/updateUser", UserController.updateUser);
-  router.get("/requestResetPassword", UserController.requestResetPassword);
+  router.post("/reset-password", UserController.requestResetPassword);
+  router.post("/new-password/", UserController.verifyLinkResetPassword);
 
   router.use(bodyParser.json());
 
