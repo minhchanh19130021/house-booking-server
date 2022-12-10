@@ -4,17 +4,14 @@ import db from "./configs/connectDB";
 import initUserRoute from "./routes/apiUser";
 import initFacilityRoute from "./routes/apiFacility";
 var cookieParser = require("cookie-parser");
-var cors = require("cors");
+// var cors = require("cors");
 import initHomeRoute from "./routes/apiHome";
 import initFilterRoute from "./routes/apiFilter";
 import initTestRoute from "./routes/apiTest";
+import initOrderRoute from "./routes/apiOrder";
+import initOrdersDetailsRoute from "./routes/apiOrdersDetails";
 import homesRoute from "./routes/home.js";
-import {
 
-  getHome,
-  getHomes,
-
-} from "./controllers/home.js";
 // import useFetch from "./hooks/useFetch";
 import cors from "cors";
 const ejs = require('ejs');
@@ -43,6 +40,8 @@ initFacilityRoute(app);
 initHomeRoute(app);
 initFilterRoute(app);
 initTestRoute(app);
+initOrderRoute(app);
+initOrdersDetailsRoute(app)
 app.use("/api/homes", homesRoute);
 
 
@@ -86,23 +85,23 @@ app.post('/pay/:id/:name/:price/:totalPirce/:description', (req, res) => {
                 },{
                     "name": "Phí phục vụ",
                     "sku": "PPV123",
-                    "price": "50.00",
+                    "price": (350000*0.00004).toFixed(2),
                     "currency": "USD",
                     "quantity": 1
                 },{
                     "name": "Phí vệ sinh",
-                    "sku": "PVS123",
-                    "price": "10.00",
+                    "sku": "PVS123",  
+                    "price": (100000*0.00004).toFixed(2),
                     "currency": "USD",
                     "quantity": 1
                 }]
             },
             "amount": {
-                "currency": "USD",
-                "total": totalPirce
+                "currency": "USD", 
+                "total": totalPirce 
             },
             "description": description
-        }]
+        }] 
     };
 
     paypal.payment.create(create_payment_json, function (error, payment) {
