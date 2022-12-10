@@ -8,7 +8,9 @@ var cookieParser = require("cookie-parser");
 // var cors = require("cors");
 import initHomeRoute from "./routes/apiHome";
 import initFilterRoute from "./routes/apiFilter";
+import initReviewRoute from "./routes/apiReview";
 import initTestRoute from "./routes/apiTest";
+import initHistoryBooking from "./routes/apiHistoryBooking";
 import initOrderRoute from "./routes/apiOrder";
 import initOrdersDetailsRoute from "./routes/apiOrdersDetails";
 import homesRoute from "./routes/home.js";
@@ -36,11 +38,14 @@ app.use(express.json());
 app.use(cookieParser());
 // router User
 initUserRoute(app);
+initReviewRoute(app)
+initHistoryBooking(app);
+// router list home
 initOrderRoute(app);
 initFacilityRoute(app);
-
 initHomeRoute(app);
 initFilterRoute(app);
+// router Test
 initTestRoute(app);
 
 initOrderRoute(app);
