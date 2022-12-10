@@ -7,8 +7,9 @@ var cookieParser = require("cookie-parser");
 var cors = require("cors");
 import initHomeRoute from "./routes/apiHome";
 import initFilterRoute from "./routes/apiFilter";
+import initReviewRoute from "./routes/apiReview";
 import initTestRoute from "./routes/apiTest";
-
+import initHistoryBooking from "./routes/apiHistoryBooking";
 
 
 require("dotenv").config();
@@ -28,10 +29,13 @@ app.use(cors());
 app.use(cookieParser());
 // router User
 initUserRoute(app);
+initReviewRoute(app)
+initHistoryBooking(app);
+// router list home
 initFacilityRoute(app);
-
 initHomeRoute(app);
 initFilterRoute(app);
+// router Test
 initTestRoute(app);
 
 app.listen(port, () => {

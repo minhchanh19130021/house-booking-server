@@ -39,5 +39,8 @@
     "nodemailer": "^6.8.0",
     "nodemon": "^2.0.20"
   },
-  "description": ""
+  "description": "",
+  "dependencies": {
+    "crypto-js": "^4.1.1"
+  }
 }
