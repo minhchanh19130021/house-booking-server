@@ -1,11 +1,18 @@
+
 import express from 'express';
 import middewareController from '../controllers/MiddewareController';
 import OrderController from '../controllers/OrderController';
 const bodyParser = require('body-parser');
 
+
 let router = express.Router();
 
 const initOrderRoute = (app) => {
+
+    
+  router.use(bodyParser.json());
+  router.post("/newBooking", OrderController.bookingHome);
+
     router.post('/orderByIdUser', OrderController.getOrderByIdUser);
     router.post('/orderByIdUserAndDate', OrderController.getOrderByIdUserAndDate);
     router.post('/orderByIdUserAndMonth', OrderController.getOrderByIdUserAndMonth);
@@ -19,3 +26,4 @@ const initOrderRoute = (app) => {
 };
 
 export default initOrderRoute;
+

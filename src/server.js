@@ -1,16 +1,19 @@
-import express from 'express';
-import configViewEngine from './configs/viewEngine';
-import db from './configs/connectDB';
-import initUserRoute from './routes/apiUser';
-import initFacilityRoute from './routes/apiFacility';
-var cookieParser = require('cookie-parser');
-var cors = require('cors');
-import initHomeRoute from './routes/apiHome';
-import initFilterRoute from './routes/apiFilter';
-import initTestRoute from './routes/apiTest';
-import homesRoute from './routes/home.js';
-import { getHome, getHomes } from './controllers/home.js';
-import initOrderRoute from './routes/apiOrder';
+
+import express from "express";
+import configViewEngine from "./configs/viewEngine";
+import db from "./configs/connectDB";
+import initUserRoute from "./routes/apiUser";
+import initFacilityRoute from "./routes/apiFacility";
+var cookieParser = require("cookie-parser");
+// var cors = require("cors");
+import initHomeRoute from "./routes/apiHome";
+import initFilterRoute from "./routes/apiFilter";
+import initTestRoute from "./routes/apiTest";
+import initOrderRoute from "./routes/apiOrder";
+import initOrdersDetailsRoute from "./routes/apiOrdersDetails";
+import homesRoute from "./routes/home.js";
+
+
 // import useFetch from "./hooks/useFetch";
 var cors = require('cors');
 const ejs = require('ejs');
@@ -39,7 +42,12 @@ initFacilityRoute(app);
 initHomeRoute(app);
 initFilterRoute(app);
 initTestRoute(app);
-app.use('/api/homes', homesRoute);
+
+initOrderRoute(app);
+initOrdersDetailsRoute(app)
+app.use("/api/homes", homesRoute);
+
+
 
 //PAYPAL
 
@@ -68,40 +76,36 @@ app.post('/pay/:id/:name/:price/:totalPirce/:description', (req, res) => {
             return_url: 'http://localhost:3000/payment/success',
             cancel_url: 'http://localhost:3000/payment',
         },
-        transactions: [
-            {
-                item_list: {
-                    items: [
-                        {
-                            name: name,
-                            sku: id,
-                            price: price,
-                            currency: 'USD',
-                            quantity: 1,
-                        },
-                        {
-                            name: 'Phí phục vụ',
-                            sku: 'PPV123',
-                            price: '50.00',
-                            currency: 'USD',
-                            quantity: 1,
-                        },
-                        {
-                            name: 'Phí vệ sinh',
-                            sku: 'PVS123',
-                            price: '10.00',
-                            currency: 'USD',
-                            quantity: 1,
-                        },
-                    ],
-                },
-                amount: {
-                    currency: 'USD',
-                    total: totalPirce,
-                },
-                description: description,
+
+        "transactions": [{
+            "item_list": {
+                "items": [{
+                    "name": name,
+                    "sku": id,
+                    "price": price,
+                    "currency": "USD",
+                    "quantity": 1
+                },{
+                    "name": "Phí phục vụ",
+                    "sku": "PPV123",
+                    "price": (350000*0.00004).toFixed(2),
+                    "currency": "USD",
+                    "quantity": 1
+                },{
+                    "name": "Phí vệ sinh",
+                    "sku": "PVS123",  
+                    "price": (100000*0.00004).toFixed(2),
+                    "currency": "USD",
+                    "quantity": 1
+                }]
             },
-        ],
+            "amount": {
+                "currency": "USD", 
+                "total": totalPirce 
+            },
+            "description": description
+        }] 
+
     };
 
     paypal.payment.create(create_payment_json, function (error, payment) {
