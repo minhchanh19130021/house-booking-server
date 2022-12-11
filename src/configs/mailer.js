@@ -1,28 +1,20 @@
-const nodemailer = require("nodemailer");
+const nodemailer = require('nodemailer');
 
-const sendEmail = async (
-  to,
-  subject,
-  text,
-  username,
-  content,
-  link,
-  name_link
-) => {
-  try {
-    var transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL_SYSTEM,
-        pass: process.env.PASSWORD_EMAIL_SYSTEM,
-      },
-    });
-    var mailOptions = {
-      from: "Website Đặt Nhà DNA",
-      to: to,
-      subject: subject,
-      text: text,
-      html: `
+const sendEmail = async (to, subject, text, username, content, link, name_link) => {
+    try {
+        var transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: process.env.EMAIL_SYSTEM,
+                pass: process.env.PASSWORD_EMAIL_SYSTEM,
+            },
+        });
+        var mailOptions = {
+            from: 'Website Đặt Nhà DNA',
+            to: to,
+            subject: subject,
+            text: text,
+            html: `
       <!doctype html>
 <html>
   <head>
@@ -179,26 +171,26 @@ table.body .article {
   </body>
 </html>
       `,
-    };
+        };
 
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.log(error);
-        return res.status(502).json({
-          success: false,
-          data: "fail",
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                console.log(error);
+                return res.status(502).json({
+                    success: false,
+                    data: 'fail',
+                });
+            } else {
+                console.log('Email sent: ' + info.response);
+                return res.status(200).json({
+                    success: true,
+                    data: 'ok',
+                });
+            }
         });
-      } else {
-        console.log("Email sent: " + info.response);
-        return res.status(200).json({
-          success: true,
-          data: "ok",
-        });
-      }
-    });
-  } catch (error) {
-    console.log(error, "Gửi không thành công");
-  }
+    } catch (error) {
+        console.log(error, 'Gửi không thành công');
+    }
 };
 
 module.exports = sendEmail;
