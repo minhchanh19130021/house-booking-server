@@ -15,6 +15,7 @@ const initUserRoute = (app) => {
     router.post('/new-password/', UserController.verifyLinkResetPassword);
     router.get('/user/get/:uid', UserController.getUserById);
     router.put('/user/update', UserController.updateUserInformation)
+    router.post('/login-google', UserController.loginUserWithGoogle);
 
     router.use(bodyParser.json());
 

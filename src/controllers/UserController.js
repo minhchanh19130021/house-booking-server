@@ -4,8 +4,151 @@ require('dotenv').config();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 import { Types } from 'mongoose';
+const { OAuth2Client } = require('google-auth-library');
 
 let refreshTokens = [];
+let loginUserWithGoogle = async (req, res) => {
+    const CLIENT_ID_GOOGLE = '579552701437-98rmrd5c0n7d4hac8ibuscs54udmrnt9.apps.googleusercontent.com';
+    try {
+        const client = new OAuth2Client(CLIENT_ID_GOOGLE);
+        const ticket = await client
+            .verifyIdToken({
+                idToken: req.body.idToken,
+                audience: CLIENT_ID_GOOGLE,
+            })
+            .then((response) => {
+                const { email, email_verified, family_name, given_name, picture } = response.payload;
+                if (email_verified) {
+                    User.findOne({ email }).exec(async (err, user) => {
+                        if (err) {
+                            return res.status(400).json({ status: false, msg: 'Lỗi hệ thống' });
+                        } else {
+                            if (user) {
+                                const accessTokenUser = generateAccessToken(user);
+                                const refreshTokenUser = generateRefreshToken(user);
+
+                                refreshTokens.push(refreshTokenUser);
+                                res.cookie('refreshTokenUser', refreshTokenUser, {
+                                    httpOnly: true,
+                                    secure: false,
+                                    path: '/',
+                                    sameSite: 'strict',
+                                });
+                                const { _id, email, username } = user;
+                                return res.status(200).json({
+                                    status: true,
+                                    msg: 'Đăng nhập thành công',
+                                    user: { _id, email, username, accessToken: accessTokenUser, status: true },
+                                });
+                            } else {
+                                const salt = await bcrypt.genSalt(10);
+                                let randomPassword = (Math.random() + 1).toString(36).substring(3).toString();
+                                const hashPassword = await bcrypt.hash(randomPassword.toString(), salt);
+
+                                const newUser = new User({
+                                    _id: new Types.ObjectId(),
+                                    firstname: family_name,
+                                    lastname: given_name,
+                                    username: email.split('@')[0],
+                                    birthday: '16/08/2001',
+                                    gender: 'Nam',
+                                    email: email,
+                                    password: hashPassword,
+                                    type: 'visitor',
+                                    active: true,
+                                    code_active: null,
+                                    address: {
+                                        city: null,
+                                        district: null,
+                                        village: null,
+                                        specifically: null,
+                                    },
+                                });
+                                newUser.save(async (err, data) => {
+                                    if (err) {
+                                        return res.status(400).json({ status: false, msg: 'Lỗi hệ thống' });
+                                    } else {
+                                        const accessTokenUser = generateAccessToken(user);
+                                        const refreshTokenUser = generateRefreshToken(user);
+
+                                        refreshTokens.push(refreshTokenUser);
+                                        res.cookie('refreshTokenUser', refreshTokenUser, {
+                                            httpOnly: true,
+                                            secure: false,
+                                            path: '/',
+                                            sameSite: 'strict',
+                                        });
+
+                                        const { _id, username } = newUser;
+                                        await sendEmail(
+                                            newUser?.email,
+                                            `Hỗ Trợ Đăng Nhập Bằng Tên Tài Khoản`,
+                                            ``,
+                                            newUser?.username,
+                                            `Cảm ơn bạn đã sử dụng dịch vụ Đặt Nhà Online.<br>Mật khẩu khi đăng nhập bằng tên tài khoản của bạn là <strong>${randomPassword.toString()}</strong>`,
+                                            'http://localhost:3000/',
+                                            `Trang Chủ`,
+                                        );
+                                        return res.status(200).json({
+                                            status: true,
+                                            msg: 'Đăng nhập thành công',
+                                            user: { _id, username, accessToken: accessTokenUser, status: true },
+                                        });
+                                    }
+                                });
+                            }
+                        }
+                    });
+                }
+            });
+    } catch (error) {
+        return res.status(500).json({ status: false, msg: error });
+    }
+};
+
+let loginUser = async (req, res) => {
+    try {
+        const user = await User.findOne({ username: req.body.username });
+
+        if (!user) {
+            return res.status(200).json({ status: false, msg: 'Tên đăng nhập không chính xác' });
+        } else {
+            if (!user.active) {
+                return res.status(200).json({ status: false, msg: 'Tài khoản chưa được kích hoạt' });
+            }
+
+            const validPassword = await bcrypt.compare(req.body.password, user.password);
+            if (!validPassword) {
+                return res.status(200).json({
+                    status: false,
+                    msg: 'Mật khẩu không chính xác',
+                });
+            }
+            if (user && validPassword) {
+                const accessTokenUser = generateAccessToken(user);
+                const refreshTokenUser = generateRefreshToken(user);
+
+                refreshTokens.push(refreshTokenUser);
+                res.cookie('refreshTokenUser', refreshTokenUser, {
+                    httpOnly: true,
+                    secure: false,
+                    path: '/',
+                    sameSite: 'strict',
+                });
+                const { _id, email, username } = user;
+                return res.status(200).json({
+                    status: true,
+                    msg: 'Đăng nhập thành công',
+                    _id,
+                    username,
+                    accessToken: accessTokenUser,
+                });
+            }
+        }
+    } catch (error) {
+        return res.status(500).json({ status: false, msg: 'Hệ thống đang bảo trì' });
+    }
+};
 
 let registerUser = async (req, res) => {
     try {
@@ -17,7 +160,7 @@ let registerUser = async (req, res) => {
             created: date.toString(),
         };
         const token_mail_verification = jwt.sign(mail, process.env.VERIFY_TOKEN_USER_SECRET, {
-            expiresIn: '1d',
+            expiresIn: '365d',
         });
         var url = 'http://localhost:8080/api/v1/' + 'verify?id=' + token_mail_verification;
         //create new user
@@ -186,49 +329,6 @@ let verifyLinkResetPassword = async (req, res) => {
     }
 };
 
-let loginUser = async (req, res) => {
-    try {
-        const user = await User.findOne({ username: req.body.username });
-
-        if (!user) {
-            return res.status(200).json({ status: false, msg: 'Tên đăng nhập không chính xác' });
-        } else {
-            if (!user.active) {
-                return res.status(200).json({ status: false, msg: 'Tài khoản chưa được kích hoạt' });
-            }
-
-            const validPassword = await bcrypt.compare(req.body.password, user.password);
-            if (!validPassword) {
-                return res.status(200).json({
-                    status: false,
-                    msg: 'Mật khẩu không chính xác',
-                });
-            }
-            if (user && validPassword) {
-                const accessTokenUser = generateAccessToken(user);
-                const refreshTokenUser = generateRefreshToken(user);
-
-                refreshTokens.push(refreshTokenUser);
-                res.cookie('refreshTokenUser', refreshTokenUser, {
-                    httpOnly: true,
-                    secure: false,
-                    path: '/',
-                    sameSite: 'strict',
-                });
-                const { password, codeActive, type, ...other } = user._doc;
-                return res.status(200).json({
-                    status: true,
-                    msg: 'Đăng nhập thành công',
-                    ...other,
-                    accessToken: accessTokenUser,
-                });
-            }
-        }
-    } catch (error) {
-        return res.status(500).json({ status: false, msg: 'Hệ thống đang bảo trì' });
-    }
-};
-
 let requestRefreshToken = async (req, res) => {
     try {
         const refreshTokenFromUser = await req.cookies.refreshTokenUser;
@@ -270,6 +370,7 @@ let requestRefreshToken = async (req, res) => {
         return res.status(500).json({ status: false, msg: error });
     }
 };
+
 
 let logoutUser = async (req, res) => {
     try {
@@ -321,18 +422,19 @@ let updateUserInformation = async (req, res, next) => {
 function generateAccessToken(user) {
     return jwt.sign(
         {
-            id: user.id,
-            type: user.type,
+            id: user?._id,
+            type: user?.type,
         },
         process.env.ACCESS_TOKEN_SECRET,
         { expiresIn: '1d' },
     );
 }
+
 function generateRefreshToken(user) {
     return jwt.sign(
         {
-            id: user.id,
-            type: user.type,
+            id: user?._id,
+            type: user?.type,
         },
         process.env.REFRESH_TOKEN_SECRET,
         { expiresIn: '365d' },
@@ -350,4 +452,5 @@ module.exports = {
     verifyLinkResetPassword,
     getUserById,
     updateUserInformation
+    loginUserWithGoogle,
 };
