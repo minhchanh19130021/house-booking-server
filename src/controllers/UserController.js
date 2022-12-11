@@ -270,30 +270,6 @@ let requestRefreshToken = async (req, res) => {
         return res.status(500).json({ status: false, msg: error });
     }
 };
-let updateUser = async (req, res) => {
-    try {
-        const refreshTokenFromUser = await req.cookies.refreshTokenUser;
-        const userByRefreshToken = await User.findOne({
-            refreshToken: refreshTokenFromUser,
-        });
-
-        if (!userByRefreshToken) {
-            return res.status(404).json({ status: false, msg: 'Bạn chưa đăng nhập' });
-        } else {
-            userByRefreshToken.firstname = req.body.firstname;
-            userByRefreshToken.lastname = req.body.lastname;
-            userByRefreshToken.username = req.body.username;
-            userByRefreshToken.gender = req.body.gender;
-            userByRefreshToken.birthday = req.body.birthday;
-            userByRefreshToken.email = req.body.email;
-
-            await userByRefreshToken.save();
-            return res.status(200).json({ status: true, msg: 'Cập nhập thông tin thành công' });
-        }
-    } catch (error) {
-        return res.status(500).json({ status: false, msg: error });
-    }
-};
 
 let logoutUser = async (req, res) => {
     try {
@@ -302,6 +278,43 @@ let logoutUser = async (req, res) => {
         return res.status(200).json({ status: true, msg: 'Đăng xuất thành công' });
     } catch (error) {
         return res.status(500).json({ status: false, msg: error });
+    }
+};
+
+
+let getUserById = async (req, res, next) => {
+    User.find({ '_id': Types.ObjectId(req.params.uid) })   
+        .exec(function (err, user) {
+            return res.status(200).json({
+                success: true,
+                data: user,               
+            });
+        });
+};
+
+let updateUserInformation = async (req, res, next) => {
+    let user = await User.findOneAndUpdate(
+        { _id: req.body._id },
+        {
+          $set: {
+            firstname: req.body.firstname,
+            lastname: req.body.lastname,
+            username: req.body.username,
+            gender: req.body.gender,
+            birthday: req.body.birthday,
+            gender: req.body.gender,
+            avatar: req.body.avatar
+          }
+        })
+    if (user) {
+        return res.status(200).json({
+            success: true,
+        })
+    }
+    else {
+        return res.status(500).json({
+            success: false,
+        })
     }
 };
 
@@ -326,13 +339,15 @@ function generateRefreshToken(user) {
     );
 }
 
+
 module.exports = {
     registerUser,
     loginUser,
     verifyUser,
     logoutUser,
     requestRefreshToken,
-    updateUser,
     requestResetPassword,
     verifyLinkResetPassword,
+    getUserById,
+    updateUserInformation
 };

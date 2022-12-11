@@ -21,6 +21,7 @@ const UserSchema = new Schema(
             village: { type: String, required: true },
             specifically: { type: String, required: true },
         },
+        avatar: { type: String },
         active: { type: Boolean, required: true, default: false },
         code_active: { type: String },
         refreshToken: { type: String },
