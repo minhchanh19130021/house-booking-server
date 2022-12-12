@@ -97,9 +97,30 @@ let getBestSellingHome = async (req, res, next) => {
     });
 };
 
+let getDetailHomeById = async (req, res) => {
+    try {
+        Home.aggregate([
+            {
+                $match: {
+                    _id: mongoose.Types.ObjectId(req.body.idHome),
+                },
+            },
+        ]).exec((err, home) => {
+            if (err) {
+                return res.status(404).json({ status: false, msg: err });
+            } else {
+                console.log(home);
+                // return res.status(200).json({ status: true, data: home });
+            }
+        });
+    } catch (error) {
+        return res.status(500).json({ status: false, msg: '' });
+    }
+};
 module.exports = {
     getAllHome,
     getAllHomeByCity,
     getNewestHome,
     getBestSellingHome,
+    getDetailHomeById,
 };

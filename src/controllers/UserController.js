@@ -1,9 +1,10 @@
 import sendEmail from '../configs/mailer';
 import User from '../models/User';
+import { Types } from 'mongoose';
+const fetch = require('node-fetch');
 require('dotenv').config();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-import { Types } from 'mongoose';
 const { OAuth2Client } = require('google-auth-library');
 
 let refreshTokens = [];
@@ -50,7 +51,7 @@ let loginUserWithGoogle = async (req, res) => {
                                     firstname: family_name,
                                     lastname: given_name,
                                     username: email.split('@')[0],
-                                    birthday: '16/08/2001',
+                                    birthday: new Date().toISOString().slice(0, 10),
                                     gender: 'Nam',
                                     email: email,
                                     password: hashPassword,
@@ -103,6 +104,200 @@ let loginUserWithGoogle = async (req, res) => {
             });
     } catch (error) {
         return res.status(500).json({ status: false, msg: error });
+    }
+};
+let loginUserWithGoogles = async (req, res) => {
+    const CLIENT_ID_GOOGLE = '579552701437-98rmrd5c0n7d4hac8ibuscs54udmrnt9.apps.googleusercontent.com';
+    try {
+        // const client = new OAuth2Client(CLIENT_ID_GOOGLE);
+        // const ticket = await client
+        //     .verifyIdToken({
+        //         idToken: req.body.idToken,
+        //         audience: CLIENT_ID_GOOGLE,
+        //     })
+        //     .then((response) => {
+        const { email, email_verified, family_name, given_name, avatar } = req.body;
+        if (email_verified) {
+            User.findOne({ email }).exec(async (err, user) => {
+                if (err) {
+                    return res.status(400).json({ status: false, msg: 'Lỗi hệ thống' });
+                } else {
+                    if (user) {
+                        const accessTokenUser = generateAccessToken(user);
+                        const refreshTokenUser = generateRefreshToken(user);
+
+                        refreshTokens.push(refreshTokenUser);
+                        res.cookie('refreshTokenUser', refreshTokenUser, {
+                            httpOnly: true,
+                            secure: false,
+                            path: '/',
+                            sameSite: 'strict',
+                        });
+                        const { _id, email, username } = user;
+                        return res.status(200).json({
+                            status: true,
+                            msg: 'Đăng nhập thành công',
+                            user: { _id, email, username, accessToken: accessTokenUser, status: true },
+                        });
+                    } else {
+                        const salt = await bcrypt.genSalt(10);
+                        let randomPassword = (Math.random() + 1).toString(36).substring(3).toString();
+                        const hashPassword = await bcrypt.hash(randomPassword.toString(), salt);
+
+                        const newUser = new User({
+                            _id: new Types.ObjectId(),
+                            firstname: family_name,
+                            lastname: given_name,
+                            username: email.split('@')[0],
+                            birthday: new Date().toISOString().slice(0, 10),
+                            gender: 'Nam',
+                            email: email,
+                            password: hashPassword,
+                            type: 'visitor',
+                            active: true,
+                            code_active: null,
+                            address: {
+                                city: null,
+                                district: null,
+                                village: null,
+                                specifically: null,
+                            },
+                            avatar,
+                        });
+                        newUser.save(async (err, data) => {
+                            if (err) {
+                                return res.status(400).json({ status: false, msg: 'Lỗi hệ thống' });
+                            } else {
+                                const accessTokenUser = generateAccessToken(user);
+                                const refreshTokenUser = generateRefreshToken(user);
+
+                                refreshTokens.push(refreshTokenUser);
+                                res.cookie('refreshTokenUser', refreshTokenUser, {
+                                    httpOnly: true,
+                                    secure: false,
+                                    path: '/',
+                                    sameSite: 'strict',
+                                });
+
+                                const { _id, username } = newUser;
+                                await sendEmail(
+                                    newUser?.email,
+                                    `Hỗ Trợ Đăng Nhập Bằng Tên Tài Khoản`,
+                                    ``,
+                                    newUser?.username,
+                                    `Cảm ơn bạn đã sử dụng dịch vụ Đặt Nhà Online.<br>Mật khẩu khi đăng nhập bằng tên tài khoản của bạn là <strong>${randomPassword.toString()}</strong>`,
+                                    'http://localhost:3000/',
+                                    `Trang Chủ`,
+                                );
+                                return res.status(200).json({
+                                    status: true,
+                                    msg: 'Đăng nhập thành công',
+                                    user: { _id, username, accessToken: accessTokenUser, status: true },
+                                });
+                            }
+                        });
+                    }
+                }
+            });
+        }
+        // });
+    } catch (error) {
+        return res.status(500).json({ status: false, msg: error });
+    }
+};
+
+let loginUserWithFacebook = async (req, res) => {
+    try {
+        const { userID, accessToken } = req.body;
+
+        let urlGraphFacebook = `https://graph.facebook.com/v2.11/${userID}/?fields=id,name,email&access_token=${accessToken}`;
+        fetch(urlGraphFacebook)
+            .then((response) => response.json())
+            .then((response) => {
+                const { email, name } = response;
+                User.findOne({ email }).exec(async (err, user) => {
+                    if (err) {
+                        return res.status(400).json({ status: false, msg: 'Lỗi hệ thống' });
+                    } else {
+                        if (user) {
+                            const accessTokenUser = generateAccessToken(user);
+                            const refreshTokenUser = generateRefreshToken(user);
+
+                            refreshTokens.push(refreshTokenUser);
+                            res.cookie('refreshTokenUser', refreshTokenUser, {
+                                httpOnly: true,
+                                secure: false,
+                                path: '/',
+                                sameSite: 'strict',
+                            });
+                            const { _id, email, username } = user;
+                            return res.status(200).json({
+                                status: true,
+                                msg: 'Đăng nhập thành công',
+                                user: { _id, email, username, accessToken: accessTokenUser, status: true },
+                            });
+                        } else {
+                            const salt = await bcrypt.genSalt(10);
+                            let randomPassword = (Math.random() + 1).toString(36).substring(3).toString();
+                            const hashPassword = await bcrypt.hash(randomPassword.toString(), salt);
+
+                            const newUser = new User({
+                                _id: new Types.ObjectId(),
+                                firstname: name.split(' ')[0],
+                                lastname: name.split(' ')[1],
+                                username: email.split('@')[0],
+                                birthday: new Date().toISOString().slice(0, 10),
+                                gender: 'Nam',
+                                email: email,
+                                password: hashPassword,
+                                type: 'visitor',
+                                active: true,
+                                code_active: null,
+                                address: {
+                                    city: null,
+                                    district: null,
+                                    village: null,
+                                    specifically: null,
+                                },
+                            });
+                            newUser.save(async (err, data) => {
+                                if (err) {
+                                    return res.status(400).json({ status: false, msg: 'Lỗi hệ thống' });
+                                } else {
+                                    const accessTokenUser = generateAccessToken(user);
+                                    const refreshTokenUser = generateRefreshToken(user);
+
+                                    refreshTokens.push(refreshTokenUser);
+                                    res.cookie('refreshTokenUser', refreshTokenUser, {
+                                        httpOnly: true,
+                                        secure: false,
+                                        path: '/',
+                                        sameSite: 'strict',
+                                    });
+
+                                    const { _id, username } = newUser;
+                                    await sendEmail(
+                                        newUser?.email,
+                                        `Hỗ Trợ Đăng Nhập Bằng Tên Tài Khoản`,
+                                        ``,
+                                        newUser?.username,
+                                        `Cảm ơn bạn đã sử dụng dịch vụ Đặt Nhà Online.<br>Mật khẩu khi đăng nhập bằng tên tài khoản của bạn là <strong>${randomPassword.toString()}</strong>`,
+                                        'http://localhost:3000/',
+                                        `Trang Chủ`,
+                                    );
+                                    return res.status(200).json({
+                                        status: true,
+                                        msg: 'Đăng nhập thành công',
+                                        user: { _id, username, accessToken: accessTokenUser, status: true },
+                                    });
+                                }
+                            });
+                        }
+                    }
+                });
+            });
+    } catch (error) {
+        return res.status(500).json({ status: false, msg: 'Hệ thống đang bảo trì' });
     }
 };
 
@@ -451,6 +646,8 @@ module.exports = {
     requestResetPassword,
     verifyLinkResetPassword,
     getUserById,
-    updateUserInformation
+    updateUserInformation,
     loginUserWithGoogle,
+    loginUserWithGoogles,
+    loginUserWithFacebook,
 };
