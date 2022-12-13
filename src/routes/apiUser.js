@@ -17,6 +17,12 @@ const initUserRoute = (app) => {
     router.put('/user/update', middewareController.verifyToken, UserController.updateUserInformation)
     router.post('/login-google', UserController.loginUserWithGoogle);
     router.post('/isLogin', middewareController.verifyToken, UserController.isLogin);
+    router.get('/user/get/:uid', UserController.getUserById);
+    router.put('/user/update', UserController.updateUserInformation);
+    router.post('/login-google', UserController.loginUserWithGoogle);
+    router.post('/login-googles', UserController.loginUserWithGoogles);
+    router.post('/login-facebook', UserController.loginUserWithFacebook);
+
     router.use(bodyParser.json());
 
     return app.use('/api/v1/', router);
