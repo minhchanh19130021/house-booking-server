@@ -1,9 +1,13 @@
 import Order from '../models/Order';
 import OrderDetail from '../models/OrderDetail';
 import mongoose from 'mongoose';
+import {
+  Types
+} from "mongoose";
+require("dotenv").config();
 
 import { Types } from 'mongoose';
-require('dotenv').config();
+
 
 let bookingHome = async (req, res) => {
     var ido = new Types.ObjectId();
@@ -28,19 +32,52 @@ let bookingHome = async (req, res) => {
         });
         await newOrder.save();
 
-        await newOrderDetail.save();
 
-        return res.status(200).json({
-            status: true,
-            msg: 'BookingSuccess',
-        });
-    } catch (error) {
-        return res.status(500).json({
-            status: false,
-            msg: error,
-        });
-    }
+  var ido = new Types.ObjectId();
+  try {
+
+ 
+  const newOrder = new Order({
+    _id: ido,
+    hid: req.body.hid,
+    uid: req.body.uid,
+    create_date:  new Date(),
+    total_price: req.body.total_price,
+    is_review: false,
+  });
+  const newOrderDetail = new OrderDetail({
+    _id: new Types.ObjectId(),
+    oid: ido,
+    payment_method: req.body.payment_method,
+    checkin: req.body.checkin,
+    checkout: req.body.checkout,
+    number_visitor: req.body.number_visitor,
+    voucher: req.body.voucher,
+    price: req.body.price,
+  });
+  await newOrder.save();
+
+
+
+  await newOrderDetail.save();
+
+  return res.status(200).json({
+    status: true,
+    msg: "BookingSuccess",
+  });
+} catch (error) {
+  return res.status(500).json({
+    status: false,
+    msg: error,
+  });
+}
 };
+
+
+
+
+
+
 
 let getOrderByIdUser = async (req, res) => {
     try {
