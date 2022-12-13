@@ -330,12 +330,14 @@ let loginUser = async (req, res) => {
                     path: '/',
                     sameSite: 'strict',
                 });
-                const { _id, email, username } = user;
+                const { _id, email, username, avatar, type } = user;
                 return res.status(200).json({
                     status: true,
                     msg: 'Đăng nhập thành công',
                     _id,
                     username,
+                    avatar,
+                    type,
                     accessToken: accessTokenUser,
                 });
             }
@@ -579,7 +581,7 @@ let logoutUser = async (req, res) => {
 
 
 let getUserById = async (req, res, next) => {
-    User.find({ '_id': Types.ObjectId(req.params.uid) })   
+    User.find({ '_id': Types.ObjectId(req.body?.uid) })   
         .exec(function (err, user) {
             return res.status(200).json({
                 success: true,
@@ -614,6 +616,14 @@ let updateUserInformation = async (req, res, next) => {
     }
 };
 
+let isLogin = async (req, res, next) => {
+    return res.status(200).json({
+        success: true,
+    });
+};
+
+
+
 function generateAccessToken(user) {
     return jwt.sign(
         {
@@ -647,6 +657,7 @@ module.exports = {
     verifyLinkResetPassword,
     getUserById,
     updateUserInformation,
+    isLogin,
     loginUserWithGoogle,
     loginUserWithGoogles,
     loginUserWithFacebook,
