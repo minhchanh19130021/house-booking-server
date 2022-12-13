@@ -11,9 +11,13 @@ const initUserRoute = (app) => {
     router.get('/verify', UserController.verifyUser);
     router.post('/logout', middewareController.verifyToken, UserController.logoutUser);
     router.post('/refreshToken', UserController.requestRefreshToken);
-    router.post('/updateUser', UserController.updateUser);
     router.post('/reset-password', UserController.requestResetPassword);
     router.post('/new-password/', UserController.verifyLinkResetPassword);
+    router.get('/user/get/:uid', UserController.getUserById);
+    router.put('/user/update', UserController.updateUserInformation);
+    router.post('/login-google', UserController.loginUserWithGoogle);
+    router.post('/login-googles', UserController.loginUserWithGoogles);
+    router.post('/login-facebook', UserController.loginUserWithFacebook);
 
     router.use(bodyParser.json());
 

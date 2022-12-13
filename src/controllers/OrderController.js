@@ -1,17 +1,37 @@
-
-
-import Order from "../models/Order";
-import OrderDetail from "../models/OrderDetail";
-
+import Order from '../models/Order';
+import OrderDetail from '../models/OrderDetail';
+import mongoose from 'mongoose';
 import {
   Types
 } from "mongoose";
 require("dotenv").config();
 
-
+import { Types } from 'mongoose';
 
 
 let bookingHome = async (req, res) => {
+    var ido = new Types.ObjectId();
+    try {
+        const newOrder = new Order({
+            _id: ido,
+            hid: req.body.hid,
+            uid: req.body.uid,
+            create_date: new Date(),
+            total_price: req.body.total_price,
+            is_review: false,
+        });
+        const newOrderDetail = new OrderDetail({
+            _id: new Types.ObjectId(),
+            oid: ido,
+            payment_method: req.body.payment_method,
+            checkin: req.body.checkin,
+            checkout: req.body.checkout,
+            number_visitor: req.body.number_visitor,
+            voucher: req.body.voucher,
+            price: req.body.price,
+        });
+        await newOrder.save();
+
 
   var ido = new Types.ObjectId();
   try {
@@ -52,6 +72,7 @@ let bookingHome = async (req, res) => {
   });
 }
 };
+
 
 
 
@@ -331,5 +352,5 @@ module.exports = {
     getOrderByHomeCategoriesThreeMonth,
     getOrderByHomeCategoriesOneMonth,
     getOrderByHomeCategoriesOneYear,
+    bookingHome,
 };
-
