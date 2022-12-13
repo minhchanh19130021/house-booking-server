@@ -1,5 +1,8 @@
 import Home from '../models/Home';
 import Order from '../models/Order';
+import Review from '../models/Review';
+
+import mongoose from 'mongoose';
 
 require('dotenv').config();
 const numberListHomeInOnePage = 3;
@@ -102,19 +105,94 @@ let getDetailHomeById = async (req, res) => {
         Home.aggregate([
             {
                 $match: {
-                    _id: mongoose.Types.ObjectId(req.body.idHome),
+                    slug: req.body.slugHome,
                 },
             },
-        ]).exec((err, home) => {
+            {
+                $lookup: {
+                    from: 'home_details',
+                    localField: '_id',
+                    foreignField: 'hid',
+                    as: 'detail',
+                },
+            },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'uid',
+                    foreignField: '_id',
+                    as: 'host',
+                },
+            },
+            {
+                $lookup: {
+                    from: 'facilities',
+                    localField: 'outstanding_facilities',
+                    foreignField: '_id',
+                    as: 'facilities',
+                },
+            },
+            {
+                $lookup: {
+                    from: 'regulations',
+                    localField: 'detail.regulations.available',
+                    foreignField: '_id',
+                    as: 'regulations_available',
+                },
+            },
+            // {
+            //     $lookup: {
+            //         from: 'facilities',
+            //         localField: 'outstanding_facilities',
+            //         foreignField: '_id',
+            //         as: 'facilities',
+            //     },
+            // },
+        ]).exec((err, homes) => {
             if (err) {
                 return res.status(404).json({ status: false, msg: err });
             } else {
-                console.log(home);
-                // return res.status(200).json({ status: true, data: home });
+                return res.status(200).json({ status: true, data: homes });
             }
         });
     } catch (error) {
-        return res.status(500).json({ status: false, msg: '' });
+        return res.status(500).json({ status: false, msg: error });
+    }
+};
+
+let loadAllReviewByIdHome = async (req, res) => {
+    try {
+        Order.aggregate([
+            {
+                $match: {
+                    hid: mongoose.Types.ObjectId(req.body.idHome),
+                },
+            },
+            {
+                $lookup: {
+                    from: 'reviews',
+                    localField: '_id',
+                    foreignField: 'oid',
+                    as: 'review',
+                },
+            },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'uid',
+                    foreignField: '_id',
+                    as: 'user',
+                },
+            },
+        ]).exec((err, review) => {
+            if (err) {
+                return res.status(404).json({ status: false, msg: err });
+            } else {
+                return res.status(200).json({ status: true, data: review });
+            }
+        });
+    } catch (error) {
+        return res.status(500).json({ status: false, msg: error });
     }
 };
 module.exports = {
@@ -123,4 +201,5 @@ module.exports = {
     getNewestHome,
     getBestSellingHome,
     getDetailHomeById,
+    loadAllReviewByIdHome,
 };
