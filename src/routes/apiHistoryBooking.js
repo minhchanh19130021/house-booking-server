@@ -1,10 +1,11 @@
 import express from "express";
 import HistoryController from "../controllers/HistoryController";
+import middewareController from '../controllers/MiddewareController';
 
 let router = express.Router();
 
 const initFacilityRoute = (app) => {
-  router.get("/history-booking", (req, res) => {
+  router.post("/history-booking", middewareController.verifyToken, (req, res) => {
     HistoryController.getHistoryBooking(req, res);
   });
 

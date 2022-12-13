@@ -8,7 +8,7 @@ let getHistoryBooking = async (req, res, next) => {
     .aggregate( [
     {
         $match: {
-            uid: mongoose.Types.ObjectId(req.query.uid)
+            uid: mongoose.Types.ObjectId(req.body.uid)
         }
     },
       { $lookup: {
@@ -40,7 +40,7 @@ let getHistoryBooking = async (req, res, next) => {
         }
       },
         { $project : 
-         { create_date: 1, is_review: 1, 'home.name': 1, 'order_detail': 1, 'voucher.name': 1, 'voucher.discount': 1, 'user.firstname': 1, 'user.lastname': 1, 'user.avatar': 1} 
+         { total_price: 1, create_date: 1, is_review: 1, 'home.name': 1, 'order_detail': 1, 'voucher.name': 1, 'voucher.discount': 1, 'user.firstname': 1, 'user.lastname': 1, 'user.avatar': 1, 'user._id': 1} 
         },
         {$sort: {create_date: -1}}
     ])
