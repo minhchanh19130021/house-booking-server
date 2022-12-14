@@ -106,6 +106,7 @@ let loginUserWithGoogle = async (req, res) => {
         return res.status(500).json({ status: false, msg: error });
     }
 };
+
 let loginUserWithGoogles = async (req, res) => {
     const CLIENT_ID_GOOGLE = '579552701437-98rmrd5c0n7d4hac8ibuscs54udmrnt9.apps.googleusercontent.com';
     try {

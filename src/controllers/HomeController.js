@@ -195,6 +195,37 @@ let loadAllReviewByIdHome = async (req, res) => {
         return res.status(500).json({ status: false, msg: error });
     }
 };
+
+let findHomeByLocation = async (req, res) => {
+    try {
+        Home.find({
+            $or: [
+                {
+                    'address.city': new RegExp(req.body.txtSearch, 'i'),
+                },
+                {
+                    'address.district': new RegExp(req.body.txtSearch, 'i'),
+                },
+                {
+                    'address.area': new RegExp(req.body.txtSearch, 'i'),
+                },
+            ],
+        }).exec((err, homes) => {
+            if (err) {
+                return res.status(404).json({ status: false, msg: 'Lỗi hệ thống' });
+            } else {
+                var homeMap = {};
+
+                homes.forEach(function (home) {
+                    homeMap[home._id] = home;
+                });
+                return res.status(200).json({ status: true, data: homeMap });
+            }
+        });
+    } catch (error) {
+        return res.status(500).json({ status: false, msg: error });
+    }
+};
 module.exports = {
     getAllHome,
     getAllHomeByCity,
@@ -202,4 +233,5 @@ module.exports = {
     getBestSellingHome,
     getDetailHomeById,
     loadAllReviewByIdHome,
+    findHomeByLocation,
 };
