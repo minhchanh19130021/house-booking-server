@@ -14,9 +14,9 @@ let loginUserWithGoogle = async (req, res) => {
         const client = new OAuth2Client(CLIENT_ID_GOOGLE);
         const ticket = await client
             .verifyIdToken({
-                idToken: req.body.idToken,
+                idToken: req.body.idToken,  
                 audience: CLIENT_ID_GOOGLE,
-            })
+            }) 
             .then((response) => {
                 const { email, email_verified, family_name, given_name, picture } = response.payload;
                 if (email_verified) {
@@ -25,7 +25,7 @@ let loginUserWithGoogle = async (req, res) => {
                             return res.status(400).json({ status: false, msg: 'Lỗi hệ thống' });
                         } else {
                             if (user) {
-                                const accessTokenUser = generateAccessToken(user);
+                                const accessTokenUser = generateAccessToken(user); 
                                 const refreshTokenUser = generateRefreshToken(user);
 
                                 refreshTokens.push(refreshTokenUser);
@@ -96,7 +96,7 @@ let loginUserWithGoogle = async (req, res) => {
                                             user: { _id, username, accessToken: accessTokenUser, status: true },
                                         });
                                     }
-                                });
+                                });    
                             }
                         }
                     });
@@ -468,7 +468,7 @@ let requestResetPassword = async (req, res) => {
             );
 
             return res.status(200).json({
-                status: true,
+                status: true,   
                 msg: 'Vui lòng kiểm tra email để tạo mật khẩu mới',
                 link: url,
             });
@@ -594,12 +594,32 @@ let updateUserInformation = async (req, res, next) => {
         {
           $set: {
             firstname: req.body.firstname,
-            lastname: req.body.lastname,
+            lastname: req.body.lastname, 
             username: req.body.username,
             gender: req.body.gender,
             birthday: req.body.birthday,
-            gender: req.body.gender,
+            gender: req.body.gender, 
             avatar: req.body.avatar
+          }
+        })
+    if (user) {
+        return res.status(200).json({
+            success: true,
+        })
+    }
+    else {
+        return res.status(500).json({
+            success: false,
+        })
+    }
+};
+
+let updateUserBonusPoint = async (req, res, next) => {
+    let user = await User.findOneAndUpdate(
+        { _id: req.body._id },
+        {
+          $set: {
+            bonus_point: req.body.bonus_point,
           }
         })
     if (user) {
@@ -637,6 +657,8 @@ function generateRefreshToken(user) {
 }
 
 
+
+
 module.exports = {
     registerUser,
     loginUser,
@@ -650,4 +672,5 @@ module.exports = {
     loginUserWithGoogle,
     loginUserWithGoogles,
     loginUserWithFacebook,
+    updateUserBonusPoint,
 };
