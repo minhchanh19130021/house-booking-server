@@ -22,6 +22,9 @@ const initFacilityRoute = (app) => {
     router.post('/review', (req, res) => {
         HomeController.loadAllReviewByIdHome(req, res);
     });
+    router.post('/search-by-location', (req, res) => {
+        HomeController.findHomeByLocation(req, res);
+    });
 
     return app.use('/api/v2/', router);
 };
