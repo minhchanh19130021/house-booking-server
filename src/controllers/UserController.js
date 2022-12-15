@@ -106,6 +106,7 @@ let loginUserWithGoogle = async (req, res) => {
         return res.status(500).json({ status: false, msg: error });
     }
 };
+
 let loginUserWithGoogles = async (req, res) => {
     const CLIENT_ID_GOOGLE = '579552701437-98rmrd5c0n7d4hac8ibuscs54udmrnt9.apps.googleusercontent.com';
     try {
@@ -330,12 +331,14 @@ let loginUser = async (req, res) => {
                     path: '/',
                     sameSite: 'strict',
                 });
-                const { _id, email, username } = user;
+                const { _id, email, username, avatar, type } = user;
                 return res.status(200).json({
                     status: true,
                     msg: 'Đăng nhập thành công',
                     _id,
                     username,
+                    avatar,
+                    type,
                     accessToken: accessTokenUser,
                 });
             }
@@ -579,7 +582,7 @@ let logoutUser = async (req, res) => {
 
 
 let getUserById = async (req, res, next) => {
-    User.find({ '_id': Types.ObjectId(req.params.uid) })   
+    User.find({ '_id': Types.ObjectId(req.body?.uid) })   
         .exec(function (err, user) {
             return res.status(200).json({
                 success: true,
@@ -614,6 +617,7 @@ let updateUserInformation = async (req, res, next) => {
     }
 };
 
+
 let updateUserBonusPoint = async (req, res, next) => {
     let user = await User.findOneAndUpdate(
         { _id: req.body._id },
@@ -632,6 +636,13 @@ let updateUserBonusPoint = async (req, res, next) => {
             success: false,
         })
     }
+};
+
+
+let isLogin = async (req, res, next) => {
+    return res.status(200).json({
+        success: true,
+    });
 };
 
 function generateAccessToken(user) {
@@ -669,6 +680,7 @@ module.exports = {
     verifyLinkResetPassword,
     getUserById,
     updateUserInformation,
+    isLogin,
     loginUserWithGoogle,
     loginUserWithGoogles,
     loginUserWithFacebook,
