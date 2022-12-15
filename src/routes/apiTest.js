@@ -4,7 +4,7 @@ import TestController from "../controllers/TestController";
 let router = express.Router();
 
 const initTestRoute = (app) => {
-  router.get("/test", (req, res)=>{
+  router.post("/test", (req, res)=>{
     TestController.testApi(req, res)
   });
 
