@@ -15,7 +15,6 @@ const initUserRoute = (app) => {
     router.post('/new-password/', UserController.verifyLinkResetPassword);
     router.post('/user/get', middewareController.verifyToken, UserController.getUserById);
     router.put('/user/update', middewareController.verifyToken, UserController.updateUserInformation)
-    router.post('/login-google', UserController.loginUserWithGoogle);
     router.post('/isLogin', middewareController.verifyToken, UserController.isLogin);
     router.get('/user/get/:uid', UserController.getUserById);
     router.put('/user/update', UserController.updateUserInformation);
