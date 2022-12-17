@@ -21,6 +21,7 @@ const initUserRoute = (app) => {
     router.post('/login-google', UserController.loginUserWithGoogle);
     router.post('/login-googles', UserController.loginUserWithGoogles);
     router.post('/login-facebook', UserController.loginUserWithFacebook);
+    router.put('/user/updateBonusPoint', UserController.updateUserBonusPoint);
 
     router.use(bodyParser.json());
 

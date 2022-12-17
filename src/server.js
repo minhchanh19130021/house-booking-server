@@ -65,12 +65,13 @@ paypal.configure({
 
 // app.get('/', (req, res) => res.render('index'));
 // const { data, loading, error } = useFetch(`/api/homes/find/636ce065825a1cd1940641a2`);
-app.post('/pay/:id/:name/:price/:totalPirce/:description', (req, res) => {
+app.post('/pay/:id/:name/:price/:totalPirce/:pricePoint/:description', (req, res) => {
     const id = req.params.id;
     const name = req.params.name;
     const totalPirce = req.params.totalPirce;
     const description = req.params.price;
     const price = req.params.price;
+    const pricePoint = req.params.pricePoint;
 
     const create_payment_json = {
         intent: 'sale',
@@ -100,6 +101,12 @@ app.post('/pay/:id/:name/:price/:totalPirce/:description', (req, res) => {
                     "name": "Phí vệ sinh",
                     "sku": "PVS123",  
                     "price": (100000*0.00004).toFixed(2),
+                    "currency": "USD",
+                    "quantity": 1
+                },{
+                    "name": "Điểm tích lũy",
+                    "sku": "PVS123",  
+                    "price": -pricePoint,
                     "currency": "USD",
                     "quantity": 1
                 }]
