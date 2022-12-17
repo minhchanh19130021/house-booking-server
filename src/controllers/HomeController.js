@@ -127,7 +127,7 @@ let getDetailHomeById = async (req, res) => {
             {
                 $lookup: {
                     from: 'facilities',
-                    localField: 'outstanding_facilities',
+                    localField: 'detail.facilities',
                     foreignField: '_id',
                     as: 'facilities',
                 },
@@ -175,6 +175,12 @@ let loadAllReviewByIdHome = async (req, res) => {
                     foreignField: 'oid',
                     as: 'review',
                 },
+            },
+            {
+                $unwind: {
+                    path: "$review",
+                    preserveNullAndEmptyArrays: false
+                }
             },
             {
                 $lookup: {

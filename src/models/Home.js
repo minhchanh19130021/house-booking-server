@@ -19,6 +19,7 @@ const HouseSchema = Schema(
         outstanding_facilities: [{ type: Schema.Types.ObjectId, ref: 'facilities' }],
         create_date: { type: Date, required: true },
         avatar: { type: String, required: true },
+        discount: {type: Number, required: true}
     },
     { versionKey: false }, // Setting the versionKey to false means the document is no longer versioned.
 );
