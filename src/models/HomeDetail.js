@@ -1,30 +1,42 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 const Schema = mongoose.Schema;
 
-const HomeDetailSchema = Schema({
-  _id: {type: Schema.Types.ObjectId},
-  description: { type: String, required: true },
-  minimum_night: { type: Number, required: true },
-  maximum_night: { type: Number, required: true },
-  number_review: { type: Number, required: true },
-  number_living_room: {type: Number, required: true},
-  number_bedroom: {type: Number , required: true},
-  number_bed: {type: Number, required: true},
-  number_bathroom: {type: Number, required: true},
-  check_in: { type: String, required: true },
-  check_out: { type: String, required: true },
-  hid: {type: Schema.Types.ObjectId, ref: "homes"},
-  facilities:  [{type: Schema.Types.ObjectId, ref: "facilities"}],
-  regulations: [{available: {type: Schema.Types.ObjectId, ref: "regulations"}}, {addtion: {type: String, required: false}}],  
-  image: [{type: String, required: false}],
-  rates: {
-    accurate: { type: Number, required: true },
-    cleanliness: { type: Number, required: true },
-    communication: { type: Number, required: true },
-    experience: { type: Number, required: true },
-    location: { type: Number, required: true, trim: true },
-},
-});
+const HomeDetailSchema = Schema(
+    {
+        _id: { type: Schema.Types.ObjectId },
+        description: { type: String, default: '' },
+        minimum_night: { type: Number },
+        maximum_night: { type: Number },
+        number_review: { type: Number },
+        number_living_room: { type: Number },
+        number_bedroom: { type: Number },
+        number_bed: { type: Number },
+        number_bathroom: { type: Number },
+        maximum_number_visitor: {
+            adult_children: { type: Number, default: 0 },
+            baby: { type: Number, default: 0 },
+            pet: { type: Number, default: 0 },
+        },
+        check_in: { type: String },
+        check_out: { type: String },
+        hid: { type: Schema.Types.ObjectId, ref: 'homes' },
+        facilities: [{ type: Schema.Types.ObjectId, ref: 'facilities' }],
+        rate: {
+            accurate: { type: Number, default: 0 },
+            cleanliness: { type: Number, default: 0 },
+            communication: { type: Number, default: 0 },
+            experience: { type: Number, default: 0 },
+            location: { type: Number, default: 0 },
+        },
+        image: { type: Array, default: [] },
+        regulations: {
+            available: [{ type: Schema.Types.ObjectId, ref: 'regulations' }],
+            addtion: [{ type: Schema.Types.ObjectId, ref: 'regulations' }],
+        },
+    },
+    { versionKey: false },
+);
 
-module.exports = mongoose.model("home_details", HomeDetailSchema);
 
+
+module.exports = mongoose.model('home_details', HomeDetailSchema);
