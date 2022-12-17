@@ -184,9 +184,9 @@ let loadAllReviewByIdHome = async (req, res) => {
             },
             {
                 $unwind: {
-                    path: "$review",
-                    preserveNullAndEmptyArrays: false
-                }
+                    path: '$review',
+                    preserveNullAndEmptyArrays: false,
+                },
             },
             {
                 $lookup: {
@@ -256,19 +256,82 @@ let createHome = async (req, res) => {
             expiresIn: '365d',
         });
         var url = 'http://localhost:8080/api/v1/' + 'verify?id=' + token_mail_verification;
-        const oldHostByUsername = await User.findOne({ username: req.body.username });
+        const oldHostByUsernameAndMail = await User.findOne({
+            username: req.body.username,
+            email: req.body.email,
+            type: 'host',
+        });
         const oldHostByEmail = await User.findOne({ email: req.body.email });
+        const oldHostByUsername = await User.findOne({ username: req.body.username });
         const oldHomeByName = await Home.findOne({ name: req.body.name });
-        if (oldHostByUsername) {
-            return res.status(400).json({
-                status: false,
-                msg: 'Tên đăng nhập đã tồn tại',
+        if (oldHostByUsernameAndMail) {
+            const newHome = new Home({
+                _id: new Types.ObjectId(),
+                uid: oldHostByUsernameAndMail._id,
+                name: req.body.name.trim(),
+                price: req.body.price,
+                address: {
+                    city: req.body.address.city.split('_')[1],
+                    district: req.body.address.district.split('_')[1],
+                    village: req.body.address.village.split('_')[1],
+                    specifically:
+                        req.body.address.specifically +
+                        ' ' +
+                        req.body.address.village.split('_')[1] +
+                        ' ' +
+                        req.body.address.district.split('_')[1] +
+                        ' ' +
+                        req.body.address.city.split('_')[1],
+                },
+                introduce: req.body.introduce.trim(),
+                segmentation: req.body.segmentation,
+                discount: req.body.discount,
+                outstanding_facilities: req.body.facilities,
+                slug: removeVietnameseTones(req.body.name).replace(/ /g, '-'),
+                folder_image: req.body.name.trim(),
+            });
+            const newHomeDetails = new HomeDetail({
+                _id: new Types.ObjectId(),
+                hid: newHome._id,
+                description: req.body.description.trim(),
+                minimum_night: req.body.minimum_night,
+                maximum_night: req.body.maximum_night,
+                number_living_room: req.body.number_living_room,
+                number_bedroom: req.body.number_bedroom,
+                number_bed: req.body.number_bed,
+                number_bathroom: req.body.number_bathroom,
+                check_in: `trước ` + req.body.check_in,
+                check_out: `sau ` + req.body.check_out,
+                facilities: req.body.facilities,
+                maximum_number_visitor: {
+                    adult_children: req.body.adult,
+                    baby: req.body.baby,
+                    pet: req.body.pets,
+                },
+                regulations: {
+                    available: req.body.regulationsAvailable,
+                },
+                image: req.body.images,
+            });
+            await newHome.save();
+            await newHomeDetails.save();
+            return res.status(200).json({
+                status: true,
+                msg: 'Đăng ký thành thông',
+                home: newHome,
+                homeDetail: newHomeDetails,
             });
         }
         if (oldHostByEmail) {
             return res.status(400).json({
                 status: false,
                 msg: 'Địa chỉ email đã tồn tại',
+            });
+        }
+        if (oldHostByUsername) {
+            return res.status(400).json({
+                status: false,
+                msg: 'Tên đăng nhập đã tồn tại',
             });
         }
         if (oldHomeByName) {
