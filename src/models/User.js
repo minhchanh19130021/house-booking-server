@@ -26,6 +26,7 @@ const UserSchema = new Schema(
         code_active: { type: String },
         refreshToken: { type: String },
         avatar: { type: String },
+        phone: { type: String },
     },
     { collection: 'users', versionKey: false },
 );

@@ -25,6 +25,9 @@ const initFacilityRoute = (app) => {
     router.post('/search-by-location', (req, res) => {
         HomeController.findHomeByLocation(req, res);
     });
+    router.post('/create-home', (req, res) => {
+        HomeController.createHome(req, res);
+    });
 
     return app.use('/api/v2/', router);
 };
