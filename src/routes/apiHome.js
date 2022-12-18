@@ -16,6 +16,12 @@ const initFacilityRoute = (app) => {
     router.get('/houses/best_selling', (req, res) => {
         HomeController.getBestSellingHome(req, res);
     });
+    router.get('/houses/most_viewed', (req, res) => {
+        HomeController.getMostViewedHome(req, res);
+    });
+    router.get('/houses/suggestion', (req, res) => {
+        HomeController.getSuggestionHome(req, res);
+    });
     router.post('/detail', (req, res) => {
         HomeController.getDetailHomeById(req, res);
     });

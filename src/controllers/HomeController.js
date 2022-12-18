@@ -77,7 +77,7 @@ let getBestSellingHome = async (req, res, next) => {
             },
         },
         {
-            $lookup: {
+            $lookup: {  
                 from: 'facilities',
                 localField: 'home_id.outstanding_facilities',
                 foreignField: '_id',
@@ -106,6 +106,35 @@ let getBestSellingHome = async (req, res, next) => {
     });
 };
 
+let getMostViewedHome = async (req, res, next) => {
+    Home.find({})
+    .populate({ path: 'outstanding_facilities', option: { strictPopulate: false } })
+    .sort({ total_view: -1 })
+    .limit(6)
+    .exec(function (err, homes) {
+        var result = [];
+        homes.forEach(function (home) {
+            result.push(home);
+        });
+        return res.status(200).json({
+            success: true,
+            data: result,
+        });
+    });
+};
+let getSuggestionHome = async (req, res, next) => {
+    let query = Home.find({}).sort({ total_view: -1 });
+    query.exec(function (err, homes) {
+        var result = [];
+        homes.forEach(function (home) {
+            result.push(home);
+        });
+        return res.status(200).json({
+            success: true,
+            data: result,
+        });
+    });
+};
 let getDetailHomeById = async (req, res) => {
     try {
         Home.aggregate([
@@ -490,6 +519,8 @@ module.exports = {
     getAllHomeByCity,
     getNewestHome,
     getBestSellingHome,
+    getMostViewedHome,
+    getSuggestionHome,
     getDetailHomeById,
     loadAllReviewByIdHome,
     findHomeByLocation,
