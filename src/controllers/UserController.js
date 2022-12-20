@@ -35,11 +35,11 @@ let loginUserWithGoogle = async (req, res) => {
                                     path: '/',
                                     sameSite: 'strict',
                                 });
-                                const { _id, email, username } = user;
+                                const { _id, email, username, type } = user;
                                 return res.status(200).json({
                                     status: true,
                                     msg: 'Đăng nhập thành công',
-                                    user: { _id, email, username, accessToken: accessTokenUser, status: true },
+                                    user: { _id, email, username, accessToken: accessTokenUser, status: true, type },
                                 });
                             } else {
                                 const salt = await bcrypt.genSalt(10);
@@ -93,7 +93,7 @@ let loginUserWithGoogle = async (req, res) => {
                                         return res.status(200).json({
                                             status: true,
                                             msg: 'Đăng nhập thành công',
-                                            user: { _id, username, accessToken: accessTokenUser, status: true },
+                                            user: { _id, username, accessToken: accessTokenUser, status: true, type: 'visitor' },
                                         });
                                     }
                                 });    
@@ -134,11 +134,11 @@ let loginUserWithGoogles = async (req, res) => {
                             path: '/',
                             sameSite: 'strict',
                         });
-                        const { _id, email, username } = user;
+                        const { _id, email, username, type } = user;
                         return res.status(200).json({
                             status: true,
                             msg: 'Đăng nhập thành công',
-                            user: { _id, email, username, accessToken: accessTokenUser, status: true },
+                            user: { _id, email, username, accessToken: accessTokenUser, status: true, type },
                         });
                     } else {
                         const salt = await bcrypt.genSalt(10);
@@ -193,7 +193,7 @@ let loginUserWithGoogles = async (req, res) => {
                                 return res.status(200).json({
                                     status: true,
                                     msg: 'Đăng nhập thành công',
-                                    user: { _id, username, accessToken: accessTokenUser, status: true },
+                                    user: { _id, username, accessToken: accessTokenUser, status: true, type: "visitor" },
                                 });
                             }
                         });

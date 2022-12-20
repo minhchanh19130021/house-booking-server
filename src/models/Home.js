@@ -31,6 +31,7 @@ const HouseSchema = Schema(
         create_date: { type: Date, required: true },
         avatar: { type: String, required: true },
         discount: { type: Number, required: true },
+        folder_image: { type: String, required: true }
     },
     { versionKey: false },
 );
