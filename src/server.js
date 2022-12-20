@@ -13,6 +13,7 @@ import initTestRoute from "./routes/apiTest";
 import initHistoryBooking from "./routes/apiHistoryBooking";
 import initOrderRoute from "./routes/apiOrder";
 import initOrdersDetailsRoute from "./routes/apiOrdersDetails";
+import initCartRoute from "./routes/apiCart";
 import homesRoute from "./routes/home.js";
 
 
@@ -47,6 +48,8 @@ initHomeRoute(app);
 initFilterRoute(app);
 // router Test
 initTestRoute(app);
+// router cart
+initCartRoute(app);
 
 initOrderRoute(app);
 initOrdersDetailsRoute(app)

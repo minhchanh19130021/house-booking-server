@@ -12,11 +12,11 @@ const connectDB = async () => {
       // "mongodb+srv://19130021:node24102022@node2410.uzhfdod.mongodb.net/tmdt"
       "mongodb+srv://19130021:node24102022@node2410.uzhfdod.mongodb.net/tmdt?retryWrites=true&w=majority"
     );
-    // HomeDetail.findOneAndUpdate(
-    //   {hid: Types.ObjectId('636ce065825a1cd1940641a2')},
-    //   { $set: { 'rates.accurate': 8}}
-    //   )
-  
+    // Home.aggregate([
+    //   {$match: {_id: Types.ObjectId('639d63a814e4f2fe8c1f282f')}},
+    //   { $set: { 'folder_image': { $toString: `$_id` }}},  
+    //   { $merge: { into: "homes", whenMatched: "replace"} }
+    // ]).exec();
     console.log("Connect Successfully !!!");
   } catch (error) {
     console.log("Connect Failed !!!");

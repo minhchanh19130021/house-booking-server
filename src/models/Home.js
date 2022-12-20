@@ -24,7 +24,7 @@ const HouseSchema = Schema(
         avatar: { type: String, default: '' },
         total_view: { type: Number, default: 0 },
         introduce: { type: String, default: '' },
-        folder_image: { type: String },
+        folder_image: { type: String, required: true },
         create_date: { type: Date, required: true, default: new Date() },
         avatar: { type: String, default: '' },
         discount: { type: Number, default: 0 },
