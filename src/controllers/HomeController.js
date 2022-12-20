@@ -77,7 +77,7 @@ let getBestSellingHome = async (req, res, next) => {
             },
         },
         {
-            $lookup: {  
+            $lookup: {
                 from: 'facilities',
                 localField: 'home_id.outstanding_facilities',
                 foreignField: '_id',
@@ -108,19 +108,19 @@ let getBestSellingHome = async (req, res, next) => {
 
 let getMostViewedHome = async (req, res, next) => {
     Home.find({})
-    .populate({ path: 'outstanding_facilities', option: { strictPopulate: false } })
-    .sort({ total_view: -1 })
-    .limit(6)
-    .exec(function (err, homes) {
-        var result = [];
-        homes.forEach(function (home) {
-            result.push(home);
+        .populate({ path: 'outstanding_facilities', option: { strictPopulate: false } })
+        .sort({ total_view: -1 })
+        .limit(6)
+        .exec(function (err, homes) {
+            var result = [];
+            homes.forEach(function (home) {
+                result.push(home);
+            });
+            return res.status(200).json({
+                success: true,
+                data: result,
+            });
         });
-        return res.status(200).json({
-            success: true,
-            data: result,
-        });
-    });
 };
 let getSuggestionHome = async (req, res, next) => {
     Order.aggregate([
@@ -133,7 +133,7 @@ let getSuggestionHome = async (req, res, next) => {
             },
         },
         {
-            $lookup: {  
+            $lookup: {
                 from: 'facilities',
                 localField: 'home_id.outstanding_facilities',
                 foreignField: '_id',
@@ -295,6 +295,7 @@ let findHomeByLocation = async (req, res) => {
 };
 
 let createHome = async (req, res) => {
+    console.log(req.body.images[0]);
     try {
         //create random password
         const salt = await bcrypt.genSalt(10);
@@ -344,6 +345,7 @@ let createHome = async (req, res) => {
                 outstanding_facilities: req.body.facilities,
                 slug: removeVietnameseTones(req.body.name).replace(/ /g, '-'),
                 folder_image: req.body.name.trim(),
+                avatar: req.body.images[0],
             });
             const newHomeDetails = new HomeDetail({
                 _id: new Types.ObjectId(),
@@ -397,15 +399,15 @@ let createHome = async (req, res) => {
         }
         const newHost = new User({
             _id: new Types.ObjectId(),
-            firstname: req.body.firstname,
-            lastname: req.body.lastname,
-            username: req.body.username,
+            firstname: req.body.firstname.trim(),
+            lastname: req.body.lastname.trim(),
+            username: req.body.username.trim(),
             birthday: req.body.birthday,
             gender: req.body.gender,
             email: req.body.email,
             phone: req.body.phone,
             type: 'host',
-            password: hashPassword,
+            password: hashPassword.trim(),
             code_active: token_mail_verification,
             address: {
                 city: req.body.address_u.city.split('_')[1],
@@ -459,6 +461,7 @@ let createHome = async (req, res) => {
             outstanding_facilities: req.body.facilities,
             slug: removeVietnameseTones(req.body.name).replace(/ /g, '-'),
             folder_image: req.body.name.trim(),
+            avatar: req.body.images[0],
         });
         const newHomeDetails = new HomeDetail({
             _id: new Types.ObjectId(),
