@@ -2,9 +2,7 @@ import Order from '../models/Order';
 import OrderDetail from '../models/OrderDetail';
 import mongoose from 'mongoose';
 
-import {
-    Types
-} from 'mongoose';
+import { Types } from 'mongoose';
 require('dotenv').config();
 
 let bookingHome = async (req, res) => {
@@ -47,12 +45,12 @@ let bookingHome = async (req, res) => {
 let getOrderByIdUser = async (req, res) => {
     try {
         await Order.find({
-            uid: req.body.idUser
+            uid: mongoose.Types.ObjectId(req.body.idUser),
         }).exec((err, orders) => {
             if (err) {
                 return res.status(404).json({
                     status: false,
-                    msg: err
+                    msg: err,
                 });
             } else {
                 let orderMap = [];
@@ -61,20 +59,21 @@ let getOrderByIdUser = async (req, res) => {
                 });
                 return res.status(200).json({
                     status: true,
-                    data: orderMap
+                    data: orderMap,
                 });
             }
         });
     } catch (error) {
         return res.status(500).json({
             status: false,
-            msg: error
+            msg: error,
         });
     }
 };
 let getOrderByIdUserAndDate = async (req, res) => {
     try {
-        await Order.aggregate([{
+        await Order.aggregate([
+            {
                 $match: {
                     uid: mongoose.Types.ObjectId(req.body.idUser),
                     create_date: {
@@ -87,17 +86,17 @@ let getOrderByIdUserAndDate = async (req, res) => {
                 $group: {
                     _id: {
                         month: {
-                            $month: '$create_date'
+                            $month: '$create_date',
                         },
                         year: {
-                            $year: '$create_date'
+                            $year: '$create_date',
                         },
                         date: {
-                            $dayOfMonth: '$create_date'
+                            $dayOfMonth: '$create_date',
                         },
                     },
                     total_cost_month: {
-                        $sum: '$total_price'
+                        $sum: '$total_price',
                     },
                 },
             },
@@ -105,7 +104,7 @@ let getOrderByIdUserAndDate = async (req, res) => {
             if (err) {
                 return res.status(404).json({
                     status: false,
-                    msg: err
+                    msg: err,
                 });
             } else {
                 let orderMap = [];
@@ -114,20 +113,21 @@ let getOrderByIdUserAndDate = async (req, res) => {
                 });
                 return res.status(200).json({
                     status: true,
-                    data: orderMap
+                    data: orderMap,
                 });
             }
         });
     } catch (error) {
         return res.status(500).json({
             status: false,
-            msg: error
+            msg: error,
         });
     }
 };
 let getOrderByIdUserAndMonth = async (req, res) => {
     try {
-        await Order.aggregate([{
+        await Order.aggregate([
+            {
                 $match: {
                     uid: mongoose.Types.ObjectId(req.body.idUser),
 
@@ -141,14 +141,14 @@ let getOrderByIdUserAndMonth = async (req, res) => {
                 $group: {
                     _id: {
                         month: {
-                            $month: '$create_date'
+                            $month: '$create_date',
                         },
                         year: {
-                            $year: '$create_date'
+                            $year: '$create_date',
                         },
                     },
                     total_cost_month: {
-                        $sum: '$total_price'
+                        $sum: '$total_price',
                     },
                 },
             },
@@ -156,7 +156,7 @@ let getOrderByIdUserAndMonth = async (req, res) => {
             if (err) {
                 return res.status(404).json({
                     status: false,
-                    msg: err
+                    msg: err,
                 });
             } else {
                 let orderMap = [];
@@ -165,20 +165,21 @@ let getOrderByIdUserAndMonth = async (req, res) => {
                 });
                 return res.status(200).json({
                     status: true,
-                    data: orderMap
+                    data: orderMap,
                 });
             }
         });
     } catch (error) {
         return res.status(500).json({
             status: false,
-            msg: error
+            msg: error,
         });
     }
 };
 let getOrderByHomeCategoriesOneWeek = async (req, res) => {
     try {
-        await Order.aggregate([{
+        await Order.aggregate([
+            {
                 $match: {
                     uid: mongoose.Types.ObjectId(req.body.idUser),
                     create_date: {
@@ -201,7 +202,7 @@ let getOrderByHomeCategoriesOneWeek = async (req, res) => {
                         type: '$home_id.segmentation',
                     },
                     total_cost_month: {
-                        $sum: '$total_price'
+                        $sum: '$total_price',
                     },
                 },
             },
@@ -209,7 +210,7 @@ let getOrderByHomeCategoriesOneWeek = async (req, res) => {
             if (err) {
                 return res.status(404).json({
                     status: false,
-                    msg: err
+                    msg: err,
                 });
             } else {
                 let orderMap = [];
@@ -218,20 +219,21 @@ let getOrderByHomeCategoriesOneWeek = async (req, res) => {
                 });
                 return res.status(200).json({
                     status: true,
-                    data: orderMap
+                    data: orderMap,
                 });
             }
         });
     } catch (error) {
         return res.status(500).json({
             status: false,
-            msg: error
+            msg: error,
         });
     }
 };
 let getOrderByHomeCategoriesOneMonth = async (req, res) => {
     try {
-        await Order.aggregate([{
+        await Order.aggregate([
+            {
                 $match: {
                     uid: mongoose.Types.ObjectId(req.body.idUser),
                     create_date: {
@@ -254,7 +256,7 @@ let getOrderByHomeCategoriesOneMonth = async (req, res) => {
                         type: '$home_id.segmentation',
                     },
                     total_cost_month: {
-                        $sum: '$total_price'
+                        $sum: '$total_price',
                     },
                 },
             },
@@ -262,7 +264,7 @@ let getOrderByHomeCategoriesOneMonth = async (req, res) => {
             if (err) {
                 return res.status(404).json({
                     status: false,
-                    msg: err
+                    msg: err,
                 });
             } else {
                 let orderMap = [];
@@ -271,20 +273,21 @@ let getOrderByHomeCategoriesOneMonth = async (req, res) => {
                 });
                 return res.status(200).json({
                     status: true,
-                    data: orderMap
+                    data: orderMap,
                 });
             }
         });
     } catch (error) {
         return res.status(500).json({
             status: false,
-            msg: error
+            msg: error,
         });
     }
 };
 let getOrderByHomeCategoriesThreeMonth = async (req, res) => {
     try {
-        await Order.aggregate([{
+        await Order.aggregate([
+            {
                 $match: {
                     uid: mongoose.Types.ObjectId(req.body.idUser),
                     create_date: {
@@ -307,7 +310,7 @@ let getOrderByHomeCategoriesThreeMonth = async (req, res) => {
                         type: '$home_id.segmentation',
                     },
                     total_cost_month: {
-                        $sum: '$total_price'
+                        $sum: '$total_price',
                     },
                 },
             },
@@ -315,7 +318,7 @@ let getOrderByHomeCategoriesThreeMonth = async (req, res) => {
             if (err) {
                 return res.status(404).json({
                     status: false,
-                    msg: err
+                    msg: err,
                 });
             } else {
                 let orderMap = [];
@@ -324,20 +327,21 @@ let getOrderByHomeCategoriesThreeMonth = async (req, res) => {
                 });
                 return res.status(200).json({
                     status: true,
-                    data: orderMap
+                    data: orderMap,
                 });
             }
         });
     } catch (error) {
         return res.status(500).json({
             status: false,
-            msg: error
+            msg: error,
         });
     }
 };
 let getOrderByHomeCategoriesOneYear = async (req, res) => {
     try {
-        await Order.aggregate([{
+        await Order.aggregate([
+            {
                 $match: {
                     uid: mongoose.Types.ObjectId(req.body.idUser),
                     create_date: {
@@ -360,7 +364,7 @@ let getOrderByHomeCategoriesOneYear = async (req, res) => {
                         type: '$home_id.segmentation',
                     },
                     total_cost_month: {
-                        $sum: '$total_price'
+                        $sum: '$total_price',
                     },
                 },
             },
@@ -368,7 +372,7 @@ let getOrderByHomeCategoriesOneYear = async (req, res) => {
             if (err) {
                 return res.status(404).json({
                     status: false,
-                    msg: err
+                    msg: err,
                 });
             } else {
                 let orderMap = [];
@@ -377,14 +381,14 @@ let getOrderByHomeCategoriesOneYear = async (req, res) => {
                 });
                 return res.status(200).json({
                     status: true,
-                    data: orderMap
+                    data: orderMap,
                 });
             }
         });
     } catch (error) {
         return res.status(500).json({
             status: false,
-            msg: error
+            msg: error,
         });
     }
 };
