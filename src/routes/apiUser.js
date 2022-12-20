@@ -14,7 +14,7 @@ const initUserRoute = (app) => {
     router.post('/reset-password', UserController.requestResetPassword);
     router.post('/new-password/', UserController.verifyLinkResetPassword);
     router.post('/user/get', middewareController.verifyToken, UserController.getUserById);
-    router.put('/user/update', middewareController.verifyToken, UserController.updateUserInformation)
+    router.put('/user/update', middewareController.verifyToken, UserController.updateUserInformation);
     router.post('/isLogin', middewareController.verifyToken, UserController.isLogin);
     router.get('/user/get/:uid', UserController.getUserById);
     router.put('/user/update', UserController.updateUserInformation);
@@ -22,6 +22,8 @@ const initUserRoute = (app) => {
     router.post('/login-googles', UserController.loginUserWithGoogles);
     router.post('/login-facebook', UserController.loginUserWithFacebook);
     router.put('/user/updateBonusPoint', UserController.updateUserBonusPoint);
+    router.post('/check-username', UserController.checkExistedUsername);
+    router.post('/change-password', UserController.changePassword);
 
     router.use(bodyParser.json());
 
