@@ -10,7 +10,7 @@ const sendEmail = async (to, subject, text, username, content, link, name_link) 
             },
         });
         var mailOptions = {
-            from: 'Website Đặt Nhà DNA',
+            from: 'Website Đặt Nhà Online',
             to: to,
             subject: subject,
             text: text,

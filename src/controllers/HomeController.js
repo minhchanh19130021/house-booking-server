@@ -268,25 +268,20 @@ let findHomeByLocation = async (req, res) => {
         Home.find({
             $or: [
                 {
-                    'address.city': new RegExp(req.body.txtSearch, 'i'),
+                    'address.city': { $regex: req.body.key, $options: 'i' },
                 },
                 {
-                    'address.district': new RegExp(req.body.txtSearch, 'i'),
+                    'address.district': { $regex: req.body.key, $options: 'i' },
                 },
                 {
-                    'address.area': new RegExp(req.body.txtSearch, 'i'),
+                    'address.village': { $regex: req.body.key, $options: 'i' },
                 },
             ],
         }).exec((err, homes) => {
             if (err) {
                 return res.status(404).json({ status: false, msg: 'Lỗi hệ thống' });
             } else {
-                var homeMap = {};
-
-                homes.forEach(function (home) {
-                    homeMap[home._id] = home;
-                });
-                return res.status(200).json({ status: true, data: homeMap });
+                return res.status(200).json({ status: true, data: homes });
             }
         });
     } catch (error) {
