@@ -1,6 +1,7 @@
 import Order from '../models/Order';
 import OrderDetail from '../models/OrderDetail';
 import mongoose from 'mongoose';
+import Cart from '../models/Cart';
 
 import { Types } from 'mongoose';
 require('dotenv').config();
@@ -26,9 +27,51 @@ let bookingHome = async (req, res) => {
             voucher: req.body.voucher,
             price: req.body.price,
         });
+       
         await newOrder.save();
 
         await newOrderDetail.save();
+
+        Cart
+        .aggregate([           
+            {$match: {
+                $and:[
+                    {$or:[
+                        { check_in: {
+                            $gte: new Date(req.body.checkin),
+                            $lte: new Date(req.body.checkout),
+                            },        
+                        },
+                        { checkout: {
+                            $gte: new Date(req.body.checkin),
+                            $lte: new Date(req.body.checkout),
+                            },        
+                        },
+                        { $and: [
+                            { check_in: {
+                            $lte: new Date(req.body.checkin),
+                                },        
+                            },
+                            { checkout: {
+                                $gte: new Date(req.body.checkout),
+                                },        
+                            },]
+                        }
+                    ]},
+                    {hid: Types.ObjectId(req.body.hid)}
+                ]
+            }
+                
+            //      { check_in: {
+            //     $gte: new Date(req.body.checkin),
+            //     $lte: new Date(req.body.checkout),
+            //   },        
+            //      hid: Types.ObjectId(req.body.hid)
+            //     },
+            },
+            { $set: { 'is_booked': true }},  
+            { $merge: { into: "carts", whenMatched: "replace"} }
+          ]).exec();
 
         return res.status(200).json({
             status: true,
