@@ -9,8 +9,7 @@ require('dotenv').config();
 let bookingHome = async (req, res) => {
     var ido = new Types.ObjectId();
     let dateCheckIn = new Date(req.body.checkin);
-     let dateCheckOut = new Date(req.body.checkout);
-    console.log(req.body.cartId);
+    let dateCheckOut = new Date(req.body.checkout);
     
     try {
         const newOrder = new Order({
@@ -32,12 +31,13 @@ let bookingHome = async (req, res) => {
             price: req.body.price,
         });
        
-        // await newOrder.save();
+        await newOrder.save();
 
-        // await newOrderDetail.save();
-     
+        await newOrderDetail.save();
+        
+        const cartId = req.body.cartId;
         if (cartId) {
-            Cart.deleteOne( { _id: mongoose.Types.ObjectId(req.body.cartId) } ).exec();
+            Cart.deleteOne( { _id: mongoose.Types.ObjectId(cartId) } ).exec();
         }
         else {
         Cart

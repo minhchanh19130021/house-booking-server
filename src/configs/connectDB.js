@@ -14,8 +14,8 @@ const connectDB = async () => {
       "mongodb+srv://19130021:node24102022@node2410.uzhfdod.mongodb.net/tmdt?retryWrites=true&w=majority"
     );
     // Home.aggregate([
-    //   {$match: {_id: Types.ObjectId('639d63a814e4f2fe8c1f282f')}},
-    //   { $set: { 'folder_image': { $toString: `$_id` }}},  
+    //   {$match: {}},
+    //   { $set: { 'uid': Types.ObjectId('639d4f0bd38553c85e565741')}},  
     //   { $merge: { into: "homes", whenMatched: "replace"} }
     // ]).exec();
     // Cart
