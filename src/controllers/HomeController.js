@@ -351,7 +351,7 @@ let createHome = async (req, res) => {
         const token_mail_verification = jwt.sign(mail, process.env.VERIFY_TOKEN_USER_SECRET, {
             expiresIn: '365d',
         });
-        var url = 'http://localhost:8080/api/v1/' + 'verify?id=' + token_mail_verification;
+        var url = '${process.env.REACT_APP_API_URL}/v1/' + 'verify?id=' + token_mail_verification;
         const oldHostByUsernameAndMail = await User.findOne({
             username: req.body.username,
             email: req.body.email,
