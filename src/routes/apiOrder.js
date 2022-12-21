@@ -12,7 +12,6 @@ const initOrderRoute = (app) => {
     
   router.use(bodyParser.json());
   router.post("/newBooking", OrderController.bookingHome);
-
     router.post('/orderByIdUser', OrderController.getOrderByIdUser);
     router.post('/orderByIdUserAndDate', OrderController.getOrderByIdUserAndDate);
     router.post('/orderByIdUserAndMonth', OrderController.getOrderByIdUserAndMonth);
@@ -20,7 +19,7 @@ const initOrderRoute = (app) => {
     router.post('/orderByHomeCategoriesOneMonth', OrderController.getOrderByHomeCategoriesOneMonth);
     router.post('/orderByHomeCategoriesThreeMonth', OrderController.getOrderByHomeCategoriesThreeMonth);
     router.post('/orderByHomeCategoriesOneYear', OrderController.getOrderByHomeCategoriesOneYear);
-
+    router.post('/orderIdByHomeId', OrderController.getOrderIdByHomeId);
     router.use(bodyParser.json());
     return app.use('/api/v1/', router);
 };

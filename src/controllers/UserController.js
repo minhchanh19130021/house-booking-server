@@ -703,7 +703,7 @@ module.exports = {
     requestRefreshToken,
     requestResetPassword,
     verifyLinkResetPassword,
-    getUserById,
+    getUserById, 
     updateUserInformation,
     isLogin,
     loginUserWithGoogle,

@@ -39,3 +39,4 @@ const initFacilityRoute = (app) => {
 };
 
 export default initFacilityRoute;
+ 

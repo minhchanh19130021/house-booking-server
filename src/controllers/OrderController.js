@@ -70,6 +70,37 @@ let getOrderByIdUser = async (req, res) => {
         });
     }
 };
+
+let getOrderIdByHomeId = async (req, res) => {
+    try {
+        console.log("hau1")
+        await Order.find({
+            hid: mongoose.Types.ObjectId(req.body.idHome),
+        }).exec((err, orders) => {
+            if (err) {
+                return res.status(404).json({
+                    status: false,
+                    msg: err,
+                });
+            } else {
+                let orderid = [];
+                orders.forEach((order) => {
+                    orderid.push(order._id);
+                });
+                return res.status(200).json({
+                    status: true,
+                    data: orderid,
+                });
+            }
+        });
+    } catch (error) {
+        return res.status(500).json({
+            status: false,
+            msg: error,
+        });
+    }
+};
+
 let getOrderByIdUserAndDate = async (req, res) => {
     try {
         await Order.aggregate([
@@ -393,6 +424,8 @@ let getOrderByHomeCategoriesOneYear = async (req, res) => {
     }
 };
 
+
+
 module.exports = {
     bookingHome,
     getOrderByIdUser,
@@ -403,4 +436,5 @@ module.exports = {
     getOrderByHomeCategoriesOneMonth,
     getOrderByHomeCategoriesOneYear,
     bookingHome,
+    getOrderIdByHomeId,
 };
