@@ -28,24 +28,45 @@ let getAllHome = async (req, res, next) => {
 };
 
 let getAllHomeByCity = async (req, res, next) => {
-    Home.find({ 'address.city': req.params.slug })
+    Home.find({
+        $or: [
+            {
+                'address.city': { $regex: `.*${req.params.slug}.*`, $options: 'i' },
+            },
+            {
+                'address.district': { $regex: `.*${req.params.slug}.*`, $options: 'i' },
+            },
+            {
+                'address.village': { $regex: `.*${req.params.slug}.*`, $options: 'i' },
+            },
+        ],
+    })
         .populate({ path: 'outstanding_facilities', option: { strictPopulate: false } })
         .skip((Number(req.params.pagination) - 1) * numberListHomeInOnePage)
         .limit(3)
         .exec(function (err, homes) {
-            let result = [];
-            homes.forEach(function (home) {
-                result.push(home);
-            });
-            Home.countDocuments({ 'address.city': req.params.slug }, (err, countListHouse) => {
-                return res.status(200).json({
-                    success: true,
-                    data: result,
-                    pagination:
-                        Math.floor(countListHouse / numberListHomeInOnePage) +
-                        (countListHouse % numberListHomeInOnePage),
+            if (err) {
+                return res.status(500).json({
+                    success: false,
+                    data: [],
+                    pagination: 0
                 });
-            });
+            }
+            else {
+                let result = [];
+                homes.forEach(function (home) {
+                    result.push(home);
+                });
+                Home.countDocuments({ 'address.city': req.params.slug }, (err, countListHouse) => {
+                    return res.status(200).json({
+                        success: true,
+                        data: result,
+                        pagination:
+                            Math.floor(countListHouse / numberListHomeInOnePage) +
+                            (countListHouse % numberListHomeInOnePage),
+                    });
+                });
+            }
         });
 };
 
@@ -56,13 +77,21 @@ let getNewestHome = async (req, res, next) => {
         .limit(6)
         .exec(function (err, homes) {
             var result = [];
-            homes.forEach(function (home) {
-                result.push(home);
-            });
-            return res.status(200).json({
-                success: true,
-                data: result,
-            });
+            if (err) {
+                return res.status(500).json({
+                    success: false,
+                    data: result,
+                });
+            }
+            else {
+                homes.forEach(function (home) {
+                    result.push(home);
+                });
+                return res.status(200).json({
+                    success: true,
+                    data: result,
+                });
+            }          
         });
 };
 
@@ -96,13 +125,21 @@ let getBestSellingHome = async (req, res, next) => {
         { $limit: 6 },
     ]).exec(function (err, homes) {
         var result = [];
-        homes.forEach(function (home) {
-            result.push(home);
-        });
-        return res.status(200).json({
-            success: true,
-            data: result,
-        });
+        if (err) {
+            return res.status(500).json({
+                success: false,
+                data: result,
+            });
+        }
+        else {
+            homes.forEach(function (home) {
+                result.push(home);
+            });
+            return res.status(200).json({
+                success: true,
+                data: result,
+            });
+        }       
     });
 };
 
