@@ -295,7 +295,6 @@ let findHomeByLocation = async (req, res) => {
 };
 
 let createHome = async (req, res) => {
-    console.log(req.body.images[0]);
     try {
         //create random password
         const salt = await bcrypt.genSalt(10);
@@ -543,6 +542,24 @@ function removeVietnameseTones(str) {
     str = str.replace(/!|@|%|\^|\*|\(|\)|\+|\=|\<|\>|\?|\/|,|\.|\:|\;|\'|\"|\&|\#|\[|\]|~|\$|_|`|-|{|}|\||\\/g, ' ');
     return str;
 }
+
+let increaseViewHome = async (req, res, next) => {
+    Home.findOneAndUpdate(
+        {_id: Types.ObjectId(req.body.hid)}, 
+        {$inc: {total_view: 1}}
+      ).exec(function (err) {         
+            if (err) {
+                return res.status(500).json({
+                    success: false,
+                });
+            } 
+            else {
+                return res.status(200).json({
+                    success: true,
+                });
+            }            
+        });
+};
 module.exports = {
     getAllHome,
     getAllHomeByCity,
@@ -554,4 +571,5 @@ module.exports = {
     loadAllReviewByIdHome,
     findHomeByLocation,
     createHome,
+    increaseViewHome
 };

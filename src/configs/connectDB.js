@@ -2,6 +2,7 @@ import express from "express";
 import mongoose from "mongoose";
 import HomeDetail from "../models/HomeDetail";
 import Home from "../models/Home";
+import Cart from '../models/Cart';
 import { Types } from "mongoose";
 
 const connectDB = async () => {
@@ -17,6 +18,16 @@ const connectDB = async () => {
     //   { $set: { 'folder_image': { $toString: `$_id` }}},  
     //   { $merge: { into: "homes", whenMatched: "replace"} }
     // ]).exec();
+    // Cart
+    // .aggregate([
+    //     {$match: { check_in: {
+    //       $gte: new Date("2013-10-01T00:00:00.000Z"),
+    //       $lte: new Date("2022-12-29T17:00:00.000+00:00"),
+    //       }}},
+    //     { $set: { 'is_booked': false }},  
+    //     { $merge: { into: "carts", whenMatched: "replace"} }
+    //   ]).exec((e, o)=>console.log(o));
+      
     console.log("Connect Successfully !!!");
   } catch (error) {
     console.log("Connect Failed !!!");
