@@ -29,5 +29,5 @@ const initUserRoute = (app) => {
 
     return app.use('/api/v1/', router);
 };
-
+ 
 export default initUserRoute;

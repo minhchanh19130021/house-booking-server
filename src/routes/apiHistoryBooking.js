@@ -9,6 +9,10 @@ const initFacilityRoute = (app) => {
     HistoryController.getHistoryBooking(req, res);
   });
 
+  router.post("/history-booking-by-homdid", (req, res) => {
+    HistoryController.getHistoryBookingByHomeId(req, res);
+  });
+
   return app.use("/api/v2/", router);
 };
 

@@ -56,7 +56,40 @@ let getHistoryBooking = async (req, res, next) => {
       })
 };
 
+let getHistoryBookingByHomeId = async (req, res, next) => {
+  Order
+  .aggregate( [
+  {
+      $match: {
+          hid: mongoose.Types.ObjectId(req.body.hid)
+      }
+  },
+    { $lookup: {
+      from: "orders_details",
+      localField: "_id",
+      foreignField : "oid",
+      as: "order_detail"
+      }
+    },
+      { $project : 
+       {'order_detail': 1} 
+      },
+      {$sort: {create_date: -1}}
+  ])
+  .exec(function (err, histories) {
+      var result = [];
+      histories.forEach(function (history) {
+          result.push(history);
+      }); 
+      return res.status(200).json({
+        success: true,
+        data: result,    
+      });
+    })
+};
+
 module.exports = {
     getHistoryBooking,
+    getHistoryBookingByHomeId,
 };
   
