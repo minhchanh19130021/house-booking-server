@@ -26,7 +26,7 @@ let getAllCartDetailByUserId = async (req, res, next) => {
         }
       },
       {
-        $project: { _id: 1, check_in: 1, checkout: 1, create_date: 1, number_visitor: 1, is_booked: 1, 'home.name': 1, 'home.price': 1, 'home._id': 1, 'home.number_review': 1, 'home.avatar': 1, 'home.discount': 1, 'home.folder_image': 1, 'home.address': 1, 'home.rate': 1, 'home_detail.description': 1, 'home_detail.maximum_number_visitor': 1,  'home_detail.minimum_night': 1, 'home_detail.maximum_night': 1, 'home_detail.rates.experience': 1},
+        $project: { _id: 1, check_in: 1, checkout: 1, create_date: 1, number_visitor: 1, is_booked: 1, 'home.name': 1, 'home.price': 1, 'home._id': 1, 'home.number_review': 1, 'home.avatar': 1, 'home.folder_image': 1, 'home.discount': 1, 'home.folder_image': 1, 'home.address': 1, 'home.rate': 1, 'home_detail.description': 1, 'home_detail.maximum_number_visitor': 1,  'home_detail.minimum_night': 1, 'home_detail.maximum_night': 1, 'home_detail.rates.experience': 1},
     },
     ])
     .exec(function (err, carts) {
