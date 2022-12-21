@@ -306,7 +306,6 @@ let loginUserWithFacebook = async (req, res) => {
 let loginUser = async (req, res) => {
     try {
         const user = await User.findOne({ username: req.body.username });
-
         if (!user) {
             return res.status(200).json({ status: false, msg: 'Tên đăng nhập không chính xác' });
         } else {
@@ -332,14 +331,15 @@ let loginUser = async (req, res) => {
                     path: '/',
                     sameSite: 'strict',
                 });
-                const { _id, email, username, avatar, type } = user;
+                const { _id, email, username, avatar, type,bonus_point } = user;
                 return res.status(200).json({
                     status: true,
                     msg: 'Đăng nhập thành công',
-                    _id,
+                    _id, 
                     username,
                     avatar,
                     type,
+                    bonus_point,
                     accessToken: accessTokenUser,
                 });
             }
