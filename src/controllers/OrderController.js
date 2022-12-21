@@ -8,6 +8,10 @@ require('dotenv').config();
 
 let bookingHome = async (req, res) => {
     var ido = new Types.ObjectId();
+    let dateCheckIn = new Date(req.body.checkin);
+     let dateCheckOut = new Date(req.body.checkout);
+    console.log(req.body.cartId);
+    
     try {
         const newOrder = new Order({
             _id: ido,
@@ -28,32 +32,36 @@ let bookingHome = async (req, res) => {
             price: req.body.price,
         });
        
-        await newOrder.save();
+        // await newOrder.save();
 
-        await newOrderDetail.save();
-
+        // await newOrderDetail.save();
+     
+        if (cartId) {
+            Cart.deleteOne( { _id: mongoose.Types.ObjectId(req.body.cartId) } ).exec();
+        }
+        else {
         Cart
         .aggregate([           
             {$match: {
                 $and:[
                     {$or:[
                         { check_in: {
-                            $gte: new Date(req.body.checkin),
-                            $lte: new Date(req.body.checkout),
+                            $gte: new Date(dateCheckIn),
+                            $lte: new Date(dateCheckOut),
                             },        
                         },
                         { checkout: {
-                            $gte: new Date(req.body.checkin),
-                            $lte: new Date(req.body.checkout),
+                            $gte: new Date(dateCheckIn),
+                            $lte: new Date(dateCheckOut),
                             },        
                         },
                         { $and: [
                             { check_in: {
-                            $lte: new Date(req.body.checkin),
+                            $lte: new Date(dateCheckIn),
                                 },        
                             },
                             { checkout: {
-                                $gte: new Date(req.body.checkout),
+                                $gte: new Date(dateCheckOut),
                                 },        
                             },]
                         }
@@ -61,17 +69,11 @@ let bookingHome = async (req, res) => {
                     {hid: Types.ObjectId(req.body.hid)}
                 ]
             }
-                
-            //      { check_in: {
-            //     $gte: new Date(req.body.checkin),
-            //     $lte: new Date(req.body.checkout),
-            //   },        
-            //      hid: Types.ObjectId(req.body.hid)
-            //     },
             },
             { $set: { 'is_booked': true }},  
             { $merge: { into: "carts", whenMatched: "replace"} }
           ]).exec();
+       }
 
         return res.status(200).json({
             status: true,

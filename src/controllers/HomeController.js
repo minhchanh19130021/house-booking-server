@@ -11,7 +11,7 @@ import mongoose from 'mongoose';
 import sendEmail from '../configs/mailer';
 
 require('dotenv').config();
-const numberListHomeInOnePage = 3;
+const numberListHomeInOnePage = 6;
 
 let getAllHome = async (req, res, next) => {
     let query = Home.find({});
@@ -43,7 +43,7 @@ let getAllHomeByCity = async (req, res, next) => {
     })
         .populate({ path: 'outstanding_facilities', option: { strictPopulate: false } })
         .skip((Number(req.params.pagination) - 1) * numberListHomeInOnePage)
-        .limit(3)
+        .limit(numberListHomeInOnePage)
         .exec(function (err, homes) {
             if (err) {
                 return res.status(500).json({
@@ -57,13 +57,22 @@ let getAllHomeByCity = async (req, res, next) => {
                 homes.forEach(function (home) {
                     result.push(home);
                 });
-                Home.countDocuments({ 'address.city': req.params.slug }, (err, countListHouse) => {
+                Home.countDocuments({  $or: [
+                    {
+                        'address.city': { $regex: `.*${req.params.slug}.*`, $options: 'i' },
+                    },
+                    {
+                        'address.district': { $regex: `.*${req.params.slug}.*`, $options: 'i' },
+                    },
+                    {
+                        'address.village': { $regex: `.*${req.params.slug}.*`, $options: 'i' },
+                    },
+                ], }, (err, countListHouse) => {
                     return res.status(200).json({
                         success: true,
                         data: result,
                         pagination:
-                            Math.floor(countListHouse / numberListHomeInOnePage) +
-                            (countListHouse % numberListHomeInOnePage),
+                            Math.ceil(countListHouse / numberListHomeInOnePage) ,
                     });
                 });
             }

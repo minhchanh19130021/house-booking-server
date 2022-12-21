@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 
 require('dotenv').config();
 
-const numberListHomeInOnePage = 3;
+const numberListHomeInOnePage = 6;
 
 let getListHomeByFilter = async (req, res, next) => {
     if (!req.body.stars || typeof req.body.stars === 'string') {
@@ -67,7 +67,7 @@ let getListHomeByFilter = async (req, res, next) => {
     });
     let countListHouse = await countListHomeByFilter(conditionToCount);
     // skip, limit to pagination
-    condition.push({ $skip: (Number(req.query.pagination) - 1) * 3 }, { $limit: 3 });
+    condition.push({ $skip: (Number(req.query.pagination) - 1) * numberListHomeInOnePage }, { $limit: numberListHomeInOnePage });
     // return list house
     HomeDetail.aggregate(condition).exec(function (err, homes) {
         let result = [];
@@ -81,8 +81,7 @@ let getListHomeByFilter = async (req, res, next) => {
             data: result,
             // if countListHouse[0]?.count = undefined then use 0
             pagination:
-                Math.floor((countListHouse[0]?.count || 0) / numberListHomeInOnePage) +
-                ((countListHouse[0]?.count || 0) % numberListHomeInOnePage),
+                Math.ceil((countListHouse[0]?.count || 0) / numberListHomeInOnePage) 
         });
     });
 };
