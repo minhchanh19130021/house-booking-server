@@ -34,6 +34,9 @@ const initFacilityRoute = (app) => {
     router.post('/create-home', (req, res) => {
         HomeController.createHome(req, res);
     });
+    router.post('/detail/increase_view', (req, res) => {
+        HomeController.increaseViewHome(req, res);
+    });
 
     return app.use('/api/v2/', router);
 };

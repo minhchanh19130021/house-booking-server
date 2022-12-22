@@ -51,7 +51,7 @@ let loginUserWithGoogle = async (req, res) => {
                                     _id: new Types.ObjectId(),
                                     firstname: family_name,
                                     lastname: given_name,
-                                    username: email.split('@')[0],
+                                    username: email?.split('@')[0],
                                     birthday: new Date().toISOString().slice(0, 10),
                                     gender: 'Nam',
                                     email: email,
@@ -94,7 +94,13 @@ let loginUserWithGoogle = async (req, res) => {
                                         return res.status(200).json({
                                             status: true,
                                             msg: 'Đăng nhập thành công',
-                                            user: { _id, username, accessToken: accessTokenUser, status: true, type: 'visitor' },
+                                            user: {
+                                                _id,
+                                                username,
+                                                accessToken: accessTokenUser,
+                                                status: true,
+                                                type: 'visitor',
+                                            },
                                         });
                                     }
                                 });
@@ -150,7 +156,7 @@ let loginUserWithGoogles = async (req, res) => {
                             _id: new Types.ObjectId(),
                             firstname: family_name,
                             lastname: given_name,
-                            username: email.split('@')[0],
+                            username: email?.split('@')[0],
                             birthday: new Date().toISOString().slice(0, 10),
                             gender: 'Nam',
                             email: email,
@@ -194,7 +200,13 @@ let loginUserWithGoogles = async (req, res) => {
                                 return res.status(200).json({
                                     status: true,
                                     msg: 'Đăng nhập thành công',
-                                    user: { _id, username, accessToken: accessTokenUser, status: true, type: "visitor" },
+                                    user: {
+                                        _id,
+                                        username,
+                                        accessToken: accessTokenUser,
+                                        status: true,
+                                        type: 'visitor',
+                                    },
                                 });
                             }
                         });
@@ -245,9 +257,9 @@ let loginUserWithFacebook = async (req, res) => {
 
                             const newUser = new User({
                                 _id: new Types.ObjectId(),
-                                firstname: name.split(' ')[0],
-                                lastname: name.split(' ')[1],
-                                username: email.split('@')[0],
+                                firstname: name?.split(' ')[0],
+                                lastname: name?.split(' ')[1],
+                                username: email?.split('@')[0],
                                 birthday: new Date().toISOString().slice(0, 10),
                                 gender: 'Nam',
                                 email: email,
@@ -331,11 +343,11 @@ let loginUser = async (req, res) => {
                     path: '/',
                     sameSite: 'strict',
                 });
-                const { _id, email, username, avatar, type,bonus_point } = user;
+                const { _id, email, username, avatar, type, bonus_point } = user;
                 return res.status(200).json({
                     status: true,
                     msg: 'Đăng nhập thành công',
-                    _id, 
+                    _id,
                     username,
                     avatar,
                     type,
@@ -384,7 +396,7 @@ let registerUser = async (req, res) => {
                 expiresIn: '365d',
             },
         );
-        var url = 'http://localhost:8080/api/v1/' + 'verify?id=' + token_mail_verification;
+        var url = '${process.env.REACT_APP_API_URL}/v1/' + 'verify?id=' + token_mail_verification;
         //create new user
         const oldUserByEmail = await User.findOne({ email: req.body.email });
         const oldUserByUsername = await User.findOne({
@@ -401,9 +413,9 @@ let registerUser = async (req, res) => {
                 msg: 'Địa chỉ email đã tồn tại',
             });
         }
-        const city = req.body.address.city.split('_')[1];
-        const district = req.body.address.district.split('_')[1];
-        const village = req.body.address.village.split('_')[1];
+        const city = req.body?.address?.city?.split('_')[1];
+        const district = req.body?.address?.district?.split('_')[1];
+        const village = req.body?.address?.village?.split('_')[1];
 
         const newUser = await new User({
             _id: new Types.ObjectId(),
@@ -612,7 +624,7 @@ let checkExistedUsername = async (req, res) => {
     }
 };
 
-let getUserById = async (req, res, next) => {
+let getUserById = async (req, res) => {
     User.find({ _id: Types.ObjectId(req.body?.uid) }).exec(function (err, user) {
         return res.status(200).json({
             success: true,
@@ -621,7 +633,7 @@ let getUserById = async (req, res, next) => {
     });
 };
 
-let updateUserInformation = async (req, res, next) => {
+let updateUserInformation = async (req, res) => {
     let user = await User.findOneAndUpdate(
         { _id: req.body._id },
         {
@@ -647,7 +659,7 @@ let updateUserInformation = async (req, res, next) => {
     }
 };
 
-let updateUserBonusPoint = async (req, res, next) => {
+let updateUserBonusPoint = async (req, res) => {
     let user = await User.findOneAndUpdate(
         { _id: req.body._id },
         {

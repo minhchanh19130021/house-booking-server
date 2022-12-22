@@ -27,6 +27,8 @@ const UserSchema = new Schema(
         code_active: { type: String },
         refreshToken: { type: String },
         phone: { type: String },
+
+        bonus_point: { type: Number, default: 0 },
     },
     { collection: 'users', versionKey: false },
 );

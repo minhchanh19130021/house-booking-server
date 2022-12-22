@@ -11,7 +11,7 @@ import mongoose from 'mongoose';
 import sendEmail from '../configs/mailer';
 
 require('dotenv').config();
-const numberListHomeInOnePage = 3;
+const numberListHomeInOnePage = 6;
 
 let getAllHome = async (req, res, next) => {
     let query = Home.find({});
@@ -28,24 +28,54 @@ let getAllHome = async (req, res, next) => {
 };
 
 let getAllHomeByCity = async (req, res, next) => {
-    Home.find({ 'address.city': req.params.slug })
+    Home.find({
+        $or: [
+            {
+                'address.city': { $regex: `.*${req.params.slug}.*`, $options: 'i' },
+            },
+            {
+                'address.district': { $regex: `.*${req.params.slug}.*`, $options: 'i' },
+            },
+            {
+                'address.village': { $regex: `.*${req.params.slug}.*`, $options: 'i' },
+            },
+        ],
+    })
         .populate({ path: 'outstanding_facilities', option: { strictPopulate: false } })
         .skip((Number(req.params.pagination) - 1) * numberListHomeInOnePage)
-        .limit(3)
+        .limit(numberListHomeInOnePage)
         .exec(function (err, homes) {
-            let result = [];
-            homes.forEach(function (home) {
-                result.push(home);
-            });
-            Home.countDocuments({ 'address.city': req.params.slug }, (err, countListHouse) => {
-                return res.status(200).json({
-                    success: true,
-                    data: result,
-                    pagination:
-                        Math.floor(countListHouse / numberListHomeInOnePage) +
-                        (countListHouse % numberListHomeInOnePage),
+            if (err) {
+                return res.status(500).json({
+                    success: false,
+                    data: [],
+                    pagination: 0
                 });
-            });
+            }
+            else {
+                let result = [];
+                homes.forEach(function (home) {
+                    result.push(home);
+                });
+                Home.countDocuments({  $or: [
+                    {
+                        'address.city': { $regex: `.*${req.params.slug}.*`, $options: 'i' },
+                    },
+                    {
+                        'address.district': { $regex: `.*${req.params.slug}.*`, $options: 'i' },
+                    },
+                    {
+                        'address.village': { $regex: `.*${req.params.slug}.*`, $options: 'i' },
+                    },
+                ], }, (err, countListHouse) => {
+                    return res.status(200).json({
+                        success: true,
+                        data: result,
+                        pagination:
+                            Math.ceil(countListHouse / numberListHomeInOnePage) ,
+                    });
+                });
+            }
         });
 };
 
@@ -56,13 +86,21 @@ let getNewestHome = async (req, res, next) => {
         .limit(6)
         .exec(function (err, homes) {
             var result = [];
-            homes.forEach(function (home) {
-                result.push(home);
-            });
-            return res.status(200).json({
-                success: true,
-                data: result,
-            });
+            if (err) {
+                return res.status(500).json({
+                    success: false,
+                    data: result,
+                });
+            }
+            else {
+                homes.forEach(function (home) {
+                    result.push(home);
+                });
+                return res.status(200).json({
+                    success: true,
+                    data: result,
+                });
+            }          
         });
 };
 
@@ -96,13 +134,21 @@ let getBestSellingHome = async (req, res, next) => {
         { $limit: 6 },
     ]).exec(function (err, homes) {
         var result = [];
-        homes.forEach(function (home) {
-            result.push(home);
-        });
-        return res.status(200).json({
-            success: true,
-            data: result,
-        });
+        if (err) {
+            return res.status(500).json({
+                success: false,
+                data: result,
+            });
+        }
+        else {
+            homes.forEach(function (home) {
+                result.push(home);
+            });
+            return res.status(200).json({
+                success: true,
+                data: result,
+            });
+        }       
     });
 };
 
@@ -268,25 +314,20 @@ let findHomeByLocation = async (req, res) => {
         Home.find({
             $or: [
                 {
-                    'address.city': new RegExp(req.body.txtSearch, 'i'),
+                    'address.city': { $regex: req.body.key, $options: 'i' },
                 },
                 {
-                    'address.district': new RegExp(req.body.txtSearch, 'i'),
+                    'address.district': { $regex: req.body.key, $options: 'i' },
                 },
                 {
-                    'address.area': new RegExp(req.body.txtSearch, 'i'),
+                    'address.village': { $regex: req.body.key, $options: 'i' },
                 },
             ],
         }).exec((err, homes) => {
             if (err) {
                 return res.status(404).json({ status: false, msg: 'Lỗi hệ thống' });
             } else {
-                var homeMap = {};
-
-                homes.forEach(function (home) {
-                    homeMap[home._id] = home;
-                });
-                return res.status(200).json({ status: true, data: homeMap });
+                return res.status(200).json({ status: true, data: homes });
             }
         });
     } catch (error) {
@@ -295,7 +336,6 @@ let findHomeByLocation = async (req, res) => {
 };
 
 let createHome = async (req, res) => {
-    console.log(req.body.images[0]);
     try {
         //create random password
         const salt = await bcrypt.genSalt(10);
@@ -311,7 +351,7 @@ let createHome = async (req, res) => {
         const token_mail_verification = jwt.sign(mail, process.env.VERIFY_TOKEN_USER_SECRET, {
             expiresIn: '365d',
         });
-        var url = 'http://localhost:8080/api/v1/' + 'verify?id=' + token_mail_verification;
+        var url = '${process.env.REACT_APP_API_URL}/v1/' + 'verify?id=' + token_mail_verification;
         const oldHostByUsernameAndMail = await User.findOne({
             username: req.body.username,
             email: req.body.email,
@@ -543,6 +583,24 @@ function removeVietnameseTones(str) {
     str = str.replace(/!|@|%|\^|\*|\(|\)|\+|\=|\<|\>|\?|\/|,|\.|\:|\;|\'|\"|\&|\#|\[|\]|~|\$|_|`|-|{|}|\||\\/g, ' ');
     return str;
 }
+
+let increaseViewHome = async (req, res, next) => {
+    Home.findOneAndUpdate(
+        {_id: Types.ObjectId(req.body.hid)}, 
+        {$inc: {total_view: 1}}
+      ).exec(function (err) {         
+            if (err) {
+                return res.status(500).json({
+                    success: false,
+                });
+            } 
+            else {
+                return res.status(200).json({
+                    success: true,
+                });
+            }            
+        });
+};
 module.exports = {
     getAllHome,
     getAllHomeByCity,
@@ -554,4 +612,5 @@ module.exports = {
     loadAllReviewByIdHome,
     findHomeByLocation,
     createHome,
+    increaseViewHome
 };
